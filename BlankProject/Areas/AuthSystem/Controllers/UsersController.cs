@@ -55,7 +55,7 @@ namespace BlankProject.Areas.Admin.Controllers
         public IActionResult LoadCreateForm()
         {
             ViewData["RoleId"] = new SelectList(roleManager.GetSelectListDTO(), "Id", "Title");
-            ViewData["UserType"] = new SelectList(ExtentionMethods.ToEnumViewModel<UserType>(), "Id", "Title");
+            ViewData["UserType"] = new SelectList(EnumExtensions.ToEnumViewModel<UserType>(), "Id", "Title");
 
             var model = new UserCreateDTO();
             return PartialView("_Create", model);
@@ -105,7 +105,7 @@ namespace BlankProject.Areas.Admin.Controllers
             if (User == null) return NotFound();
 
             ViewData["RoleId"] = new SelectList(roleManager.GetSelectListDTO(), "Id", "Title", User.RoleId);
-            ViewData["UserType"] = new SelectList(ExtentionMethods.ToEnumViewModel<UserType>(), "Id", "Title");
+            ViewData["UserType"] = new SelectList(EnumExtensions.ToEnumViewModel<UserType>(), "Id", "Title");
 
             return PartialView("_Edit", User);
         }

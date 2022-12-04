@@ -3,10 +3,11 @@ using Domain.Enums;
 using DTO.Base;
 using DTO.DataTable;
 using DTO.User;
+using Infrastructure.Data;
 
 namespace BLL.Interface
 {
-    public interface IUserManager : IManager<User>
+    public interface IUserManager : IManager<User, ApplicationContext>
     {
         /// <summary>
         /// گرفتن لیست کاربران برای نمایش در پنل مدیریت

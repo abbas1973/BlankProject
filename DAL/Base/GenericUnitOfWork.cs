@@ -1,4 +1,5 @@
 ﻿using DAL.Interface;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL
@@ -7,9 +8,11 @@ namespace DAL
     /// کلاس جنریک برای منیجر های اصلی موجودیت ها و منیجر پایه
     /// </summary>
     /// <typeparam name="TEntity">موجودیت</typeparam>
-    public class UnitOfWork<TEntity> : UnitOfWork, IUnitOfWork<TEntity> where TEntity : class
+    public class UnitOfWork<TEntity, TContext> : UnitOfWork, IUnitOfWork<TEntity, TContext> 
+        where TEntity : class
+        where TContext : DbContext
     {
-        public UnitOfWork(DbContext context) : base(context)
+        public UnitOfWork(DbContexts contexts) : base(contexts)
         {
         }
 
@@ -20,7 +23,12 @@ namespace DAL
             get
             {
                 if (_entities == null)
-                    _entities = new Repository<TEntity>(Context);
+                {
+                    if(typeof(TContext) == typeof(LogContext))
+                        _entities = new Repository<TEntity>(logContext);
+                    else
+                        _entities = new Repository<TEntity>(applicationContext);
+                }
                 return _entities;
             }
         }

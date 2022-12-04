@@ -1,12 +1,13 @@
 ﻿using Domain.Entities;
 using DTO.Base;
+using Infrastructure.Data;
 
 namespace BLL.Interface
 {
     /// <summary>
     /// مدیریت منوهای قابل دسترسی هر نقش
     /// </summary>
-    public interface IRoleMenuManager : IManager<RoleMenu>
+    public interface IRoleMenuManager : IManager<RoleMenu, ApplicationContext>
     {
         /// <summary>
         /// گرفتن همه دسترسی های یک نقش خاص

@@ -1,6 +1,7 @@
 ﻿using DAL;
 using DAL.Interface;
 using DTO.Base;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -15,9 +16,11 @@ namespace BLL.Interface
     /// email: abbas.mn1973@gmail.com
     /// </para>
     /// </summary>
-    public interface IManager<TEntity> where TEntity : class
+    public interface IManager<TEntity, TContext>
+        where TEntity : class
+        where TContext : DbContext
     {
-        IUnitOfWork<TEntity> UOW { get; set; }
+        IUnitOfWork<TEntity, TContext> UOW { get; set; }
 
 
         IEnumerable<TEntity> GetAll();

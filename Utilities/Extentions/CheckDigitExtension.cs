@@ -7,10 +7,7 @@ using System.Linq;
 namespace Utilities.Extentions
 {
     /// <summary>
-    /// مدیریت ایجاد و بررسی چک دیجیت
-    /// <para>
-    /// Powered By Abbas Mohammadnezhad
-    /// </para>
+    /// مدیریت ایجاد و بررسی چک دیجیت برای شماره بارنامه
     /// </summary>
     public static class CheckDigitExtension
     {

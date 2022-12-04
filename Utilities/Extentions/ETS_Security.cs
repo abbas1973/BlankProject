@@ -3,14 +3,14 @@ using System.Text;
 
 namespace Utilities
 {
-    /// <summary>
-    /// Powered By Abbas Mohammadnezhad
-    /// </summary>
     public static class ETS_Security
     {
-        public static string GetHash(this string pass)
+        public static string GetHash(this string pass, string salt = null)
         {
-            pass += "@7^e{3x#";
+            if(salt != null)
+                pass += salt;
+            else
+                pass += "@7^e{3x#";
             byte[] data = Encoding.ASCII.GetBytes(pass);
 
             #region هش با استفاده از MD5
@@ -31,5 +31,6 @@ namespace Utilities
             string encPass = Encoding.ASCII.GetString(data);
             return encPass;
         }
+
     }
 }

@@ -1,13 +1,14 @@
 ﻿using Domain.Entities;
 using DTO.Base;
 using DTO.Menu;
+using Infrastructure.Data;
 
 namespace BLL.Interface
 {
     /// <summary>
     /// عملیات احراز هویت و لاگین
     /// </summary>
-    public interface IAuthManager : IManager<User>
+    public interface IAuthManager : IManager<User, ApplicationContext>
     {
         
         /// <summary>

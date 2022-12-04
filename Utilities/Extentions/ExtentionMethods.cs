@@ -60,12 +60,14 @@ namespace Utilities.Extentions
         /// </summary>
         /// <param name="file">فایل</param>
         /// <param name="SavePath">
-        /// مسیر فایل درون پوشه روت به همراه اسم فایل. مثلا:
+        /// مسیر فایل درون پوشه روت. مثلا:
         /// /Uploads/Admin/
         /// </param>
         /// <param name="FileName">نام به همراه اکستنشن</param>
+        /// <param name="type">تایپ فایل</param>
+        /// <param name="ProjectPhysicalPath">آدرس فیزیکی روت پروژه (بیرون wwwroot(</param>
         /// <returns>نام نهایی فایل ذخیره شده</returns>
-        public static async Task<UtilityBaseResult> SaveFile(this IFormFile file, string SavePath, string FileName = null, FileFormat? type = null)
+        public static async Task<UtilityBaseResult> SaveFile(this IFormFile file, string SavePath, string FileName = null, FileFormat? type = null, string ProjectPhysicalPath = null)
         {
             if (file == null)
                 return new UtilityBaseResult(false, "فایل موجود نیست!");
@@ -86,14 +88,16 @@ namespace Utilities.Extentions
                 FileName = Guid.NewGuid().ToString() + ext;
             }
 
-            string _Path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot" + SavePath + FileName);
+            var myPath = ProjectPhysicalPath ?? Directory.GetCurrentDirectory();
+
+            string _Path = Path.Combine(myPath, "wwwroot" + SavePath + FileName);
 
             var i = 1;
             string BaseName = FileName;
             while (File.Exists(_Path))
             {
                 FileName = i + "-" + BaseName;
-                _Path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot" + SavePath + FileName);
+                _Path = Path.Combine(myPath, "wwwroot" + SavePath + FileName);
                 i++;
             }
 
@@ -102,7 +106,7 @@ namespace Utilities.Extentions
                 await file.CopyToAsync(stream);
             }
 
-            return new UtilityBaseResult(true, "ذخیره عکس با موفقیت انجام شد.", FileName);
+            return new UtilityBaseResult(true, "ذخیره فایل با موفقیت انجام شد.", FileName);
         }
 
 
@@ -315,7 +319,7 @@ namespace Utilities.Extentions
             if (string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input))
                 return null;
 
-            input = input.Trim().ToLower();
+            input = input.Trim();
 
             string[] persian = new string[10] { "۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹" };
             string[] arabic = new string[10] { "٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩" };
@@ -621,68 +625,6 @@ namespace Utilities.Extentions
 
 
 
-
-        /// <summary>
-        /// گرفتن یک نام فارسی از Description یک enum
-        /// get userfriendly name from Description attr of enum 
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static string GetEnumDescription(this Enum value)
-        {
-            Type type = value.GetType();
-            string name = Enum.GetName(type, value);
-            if (name != null)
-            {
-                FieldInfo field = type.GetField(name);
-                if (field != null)
-                {
-                    DescriptionAttribute attr =
-                           Attribute.GetCustomAttribute(field,
-                             typeof(DescriptionAttribute)) as DescriptionAttribute;
-                    if (attr != null)
-                    {
-                        return attr.Description;
-                    }
-                }
-            }
-            return null;
-        }
-
-
-        /// <summary>
-        /// نحوه استفاده 
-        /// ExtentionMethods.ToEnumViewModel<EnumName>()
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static List<EnumViewModel> ToEnumViewModel<T>()
-        {
-            var model = Enum.GetValues(typeof(T)).Cast<int>()
-                .Select(id => new EnumViewModel
-                {
-                    Id = id,
-                    Key = Enum.GetName(typeof(T), id),
-                    Title = ((Enum)Enum.Parse(typeof(T), Enum.GetName(typeof(T), id), true)).GetEnumDescription()
-                }).ToList();
-            return model;
-        }
-
-
-
-
-    }
-
-
-
-    /// <summary>
-    /// مدل برای تبدیل enum به کلاس
-    /// </summary>
-    public class EnumViewModel
-    {
-        public int? Id { get; set; }
-        public string Key { get; set; }
-        public string Title { get; set; }
     }
 
 

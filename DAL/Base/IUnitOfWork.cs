@@ -21,12 +21,19 @@
         #endregion
 
 
+        #region LogSystem
+        IUserLogRepository UserLogs { get; }
+
+        #endregion
+
+
+
         bool Commit();
 
         Task<bool> CommitAsync();
 
-        bool ExecuteNonQuery(string Query, params object[] Parameters);
+        bool ExecuteNonQuery<TContext>(string Query, params object[] Parameters);
 
-        Task<bool> ExecuteNonQueryAsync(string Query, params object[] Parameters);
+        Task<bool> ExecuteNonQueryAsync<TContext>(string Query, params object[] Parameters);
     }
 }

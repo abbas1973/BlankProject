@@ -2,6 +2,7 @@
 using Domain.Entities;
 using DTO.Base;
 using DTO.DataTable;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace BLL
@@ -10,9 +11,9 @@ namespace BLL
     /// <summary>
     /// مدیریت نقش ها
     /// </summary>
-    public class RoleManager : Manager<Role>, IRoleManager
+    public class RoleManager : Manager<Role, ApplicationContext>, IRoleManager
     {
-        public RoleManager(DbContext _Context) : base(_Context)
+        public RoleManager(DbContexts _Context) : base(_Context)
         {
         }
 

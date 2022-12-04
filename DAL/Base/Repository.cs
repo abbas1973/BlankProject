@@ -20,8 +20,7 @@ namespace DAL
     public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEntity>
     where TEntity : class
     {
-        public Repository(DbContext _Context)
-            : base(_Context)
+        public Repository(DbContext _Context) : base(_Context)
         {
         }
 

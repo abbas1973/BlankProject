@@ -4,15 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using DTO.Base;
 using DTO.Menu;
 using LinqKit;
+using Infrastructure.Data;
 
 namespace BLL
 {
     /// <summary>
     /// مدیریت منو ها
     /// </summary>
-    public class MenuManager : Manager<Menu>, IMenuManager
+    public class MenuManager : Manager<Menu, ApplicationContext>, IMenuManager
     {
-        public MenuManager(DbContext _Context) : base(_Context)
+        public MenuManager(DbContexts _Context) : base(_Context)
         {
         }
 

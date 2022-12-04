@@ -9,6 +9,7 @@ using LinqKit;
 using DTO.Menu;
 using Utilities.Extentions;
 using Services.SessionServices;
+using Infrastructure.Data;
 
 namespace BLL
 {
@@ -17,14 +18,14 @@ namespace BLL
     /// <summary>
     /// عملیات احراز هویت و لاگین
     /// </summary>
-    public class AuthManager : Manager<User>, IAuthManager
+    public class AuthManager : Manager<User, ApplicationContext>, IAuthManager
     {
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ISession Session;
 
 
 
-        public AuthManager(DbContext _Context, IHttpContextAccessor _httpContextAccessor) : base(_Context)
+        public AuthManager(DbContexts _Context, IHttpContextAccessor _httpContextAccessor) : base(_Context)
         {
             httpContextAccessor = _httpContextAccessor;
             Session = httpContextAccessor.HttpContext.Session;

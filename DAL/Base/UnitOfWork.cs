@@ -1,4 +1,6 @@
 ﻿using DAL.Interface;
+using Infrastructure.Data;
+using Infrastructure.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL
@@ -12,15 +14,18 @@ namespace DAL
     /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
-        public UnitOfWork(DbContext context)
+        protected readonly ApplicationContext applicationContext;
+        protected readonly LogContext logContext;
+
+        public UnitOfWork(DbContexts contexts)
         {
-            Context = context;
+            applicationContext = contexts[DbContextType.ApplicationContext.ToString()] as ApplicationContext;
+            logContext = contexts[DbContextType.LogContext.ToString()] as LogContext;
         }
 
 
-        #region private properties 
-        protected readonly DbContext Context;
 
+        #region private properties
         #region Auth System
         private MenuRepository _menus;
         private RoleRepository _roles;
@@ -28,6 +33,9 @@ namespace DAL
         private UserRepository _users;
         #endregion
 
+        #region LogSystem
+        private UserLogRepository _userLogs;
+        #endregion
         #endregion
 
 
@@ -39,7 +47,7 @@ namespace DAL
             get
             {
                 if (_menus == null)
-                    _menus = new MenuRepository(Context);
+                    _menus = new MenuRepository(applicationContext);
                 return _menus;
             }
         }
@@ -49,7 +57,7 @@ namespace DAL
             get
             {
                 if (_roles == null)
-                    _roles = new RoleRepository(Context);
+                    _roles = new RoleRepository(applicationContext);
                 return _roles;
             }
         }
@@ -59,7 +67,7 @@ namespace DAL
             get
             {
                 if (_roleMenus == null)
-                    _roleMenus = new RoleMenuRepository(Context);
+                    _roleMenus = new RoleMenuRepository(applicationContext);
                 return _roleMenus;
             }
         }
@@ -69,14 +77,29 @@ namespace DAL
             get
             {
                 if (_users == null)
-                    _users = new UserRepository(Context);
+                    _users = new UserRepository(applicationContext);
                 return _users;
             }
         }
 
         #endregion
 
+
+        #region LogSystem
+        public IUserLogRepository UserLogs
+        {
+            get
+            {
+                if (_userLogs == null)
+                    _userLogs = new UserLogRepository(logContext);
+                return _userLogs;
+            }
+        }
+
         #endregion
+
+        #endregion
+
 
 
         #region Commit
@@ -88,7 +111,11 @@ namespace DAL
         {
             try
             {
-                Context.SaveChanges();
+                if (applicationContext.ChangeTracker.HasChanges())
+                    applicationContext.SaveChanges();
+
+                if (logContext.ChangeTracker.HasChanges())
+                    logContext.SaveChanges();
                 return true;
             }
             catch (Exception ex)
@@ -105,15 +132,20 @@ namespace DAL
         /// <returns></returns>
         public async Task<bool> CommitAsync()
         {
-            //try
-            //{
-            await Context.SaveChangesAsync();
-            return true;
-            //}
-            //catch
-            //{
-            //    return false;
-            //}
+            try
+            {
+                if (applicationContext.ChangeTracker.HasChanges())
+                    await applicationContext.SaveChangesAsync();
+
+                if (logContext.ChangeTracker.HasChanges())
+                    await logContext.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
         #endregion
 
@@ -126,12 +158,20 @@ namespace DAL
         /// <param name="Query">متن کوئری</param>
         /// <param name="Parameters">پارامتر های کوئری</param>
         /// <returns></returns>
-        public bool ExecuteNonQuery(string Query, params object[] Parameters)
+        public bool ExecuteNonQuery<TContext>(string Query, params object[] Parameters)
         {
             try
             {
-                int NumberOfRowEffected = Context.Database.ExecuteSqlRaw(Query, Parameters);
-                return true;
+                if (typeof(TContext) == typeof(LogContext))
+                {
+                    int NumberOfRowEffected = logContext.Database.ExecuteSqlRaw(Query, Parameters);
+                    return true;
+                }
+                else
+                {
+                    int NumberOfRowEffected = applicationContext.Database.ExecuteSqlRaw(Query, Parameters);
+                    return true;
+                }
             }
             catch (Exception e)
             {
@@ -147,12 +187,20 @@ namespace DAL
         /// <param name="Query">متن کوئری</param>
         /// <param name="Parameters">پارامتر های کوئری</param>
         /// <returns></returns>
-        public async Task<bool> ExecuteNonQueryAsync(string Query, params object[] Parameters)
+        public async Task<bool> ExecuteNonQueryAsync<TContext>(string Query, params object[] Parameters)
         {
             try
             {
-                int NumberOfRowEffected = await Context.Database.ExecuteSqlRawAsync(Query, Parameters);
-                return true;
+                if (typeof(TContext) == typeof(LogContext))
+                {
+                    int NumberOfRowEffected = await logContext.Database.ExecuteSqlRawAsync(Query, Parameters);
+                    return true;
+                }
+                else
+                {
+                    int NumberOfRowEffected = await applicationContext.Database.ExecuteSqlRawAsync(Query, Parameters);
+                    return true;
+                }
             }
             catch (Exception e)
             {
@@ -168,7 +216,8 @@ namespace DAL
         /// </summary>
         public void Dispose()
         {
-            Context.Dispose();
+            applicationContext.Dispose();
+            logContext.Dispose();
         }
 
 

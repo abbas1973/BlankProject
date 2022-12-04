@@ -4,6 +4,10 @@ using Filters;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using AntiXssMiddleware.Middleware;
+using Services.RedisService;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.Utf8Json;
+using StackExchange.Redis.Extensions.Newtonsoft;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +21,39 @@ services.AddControllersWithViews()
 services.AddRazorPages();
 
 
+
 #region DB Context
 var connectionString = builder.Configuration.GetConnectionString("ApplicationContext");
 services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connectionString)/*, ServiceLifetime.Transient*/);
+
+// Log Connection
+var logConnectionString = builder.Configuration.GetConnectionString("LogContext");
+services.AddDbContext<LogContext>(options => options.UseSqlServer(logConnectionString));
+#endregion
+
+
+
+#region redis
+//var multiplexer = ConnectionMultiplexer.Connect("localhost:6379");
+//services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+
+var RedisConfigurations = new List<RedisConfiguration>();
+var redisConfig = builder.Configuration.GetSection("Redis").Get<RedisConfiguration>();
+RedisConfigurations.Add(redisConfig);
+
+services.AddStackExchangeRedisExtensions<Utf8JsonSerializer>((options) =>
+{
+    return RedisConfigurations;
+}).AddStackExchangeRedisExtensions<NewtonsoftSerializer>((options) =>
+{
+    return RedisConfigurations;
+});
+
+services.AddSingleton<IRedisManager, RedisManager>();
+
+#region ثبت لاگ در بکگراند
+services.AddHostedService<LogBackgroundWorker>();
+#endregion
 #endregion
 
 
@@ -87,6 +121,12 @@ services.AddAntiforgery(options =>
 #region Dipendency Injection
 // موجودیت های پایه
 services.AddScoped<DbContext, ApplicationContext>();
+
+// برای لاگ گیری
+services.AddScoped<DbContext, LogContext>();
+
+// فکتوری برای همه کانتکست ها
+services.AddScoped<DbContexts>();
 
 #region DataTable
 services.AddScoped<IDataTableManager, DataTableManager>();

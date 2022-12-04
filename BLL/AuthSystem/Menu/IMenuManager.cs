@@ -1,13 +1,14 @@
 ﻿using Domain.Entities;
 using DTO.Base;
 using DTO.Menu;
+using Infrastructure.Data;
 
 namespace BLL.Interface
 {
     /// <summary>
     /// مدیریت منو ها
     /// </summary>
-    public interface IMenuManager : IManager<Menu>
+    public interface IMenuManager : IManager<Menu, ApplicationContext>
     {
         /// <summary>
         /// گرفتن اطلاعات منو بصورت درختی

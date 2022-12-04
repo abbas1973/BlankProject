@@ -10,14 +10,15 @@ using Utilities;
 using LinqKit;
 using Domain.Enums;
 using Utilities.Extentions;
+using Infrastructure.Data;
 
 namespace BLL
 {
-    public class UserManager : Manager<User>, IUserManager
+    public class UserManager : Manager<User, ApplicationContext>, IUserManager
     {
         protected readonly IHttpContextAccessor httpContextAccessor;
         protected readonly ISession Session;
-        public UserManager(DbContext _Context, IHttpContextAccessor _httpContextAccessor) : base(_Context)
+        public UserManager(DbContexts _Context, IHttpContextAccessor _httpContextAccessor) : base(_Context)
         {
             httpContextAccessor = _httpContextAccessor;
             Session = httpContextAccessor.HttpContext.Session;

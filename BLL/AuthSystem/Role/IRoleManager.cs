@@ -2,6 +2,7 @@
 using Domain.Entities;
 using DTO.Base;
 using DTO.DataTable;
+using Infrastructure.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace BLL.Interface
     /// <summary>
     /// مدیریت نقش ها
     /// </summary>
-    public interface IRoleManager : IManager<Role>
+    public interface IRoleManager : IManager<Role, ApplicationContext>
     {
 
         /// <summary>

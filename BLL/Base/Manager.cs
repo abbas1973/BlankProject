@@ -2,6 +2,7 @@
 using DAL;
 using DAL.Interface;
 using DTO.Base;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -13,14 +14,14 @@ namespace BLL
     /// email: abbas.mn1973@gmail.com
     /// </para>
     /// </summary>
-    public class Manager<TEntity> : IManager<TEntity> where TEntity : class
+    public class Manager<TEntity, TContext> : IManager<TEntity, TContext> 
+        where TEntity : class
+        where TContext : DbContext
     {
-        protected DbContext Context;
-        public IUnitOfWork<TEntity> UOW { get; set; }
-        public Manager(DbContext _Context)
+        public IUnitOfWork<TEntity, TContext> UOW { get; set; }
+        public Manager(DbContexts contexts)
         {
-            Context = _Context;
-            UOW = new UnitOfWork<TEntity>(_Context);
+            UOW = new UnitOfWork<TEntity, TContext>(contexts);
         }
 
 
@@ -54,10 +55,12 @@ namespace BLL
         {
             UOW.Entities.Add(entity);
             var IsSuccess = UOW.Commit();
+            var IdProperty = entity.GetType().GetProperty("Id").GetValue(entity, null);
             return new BaseResult
             {
                 Status = IsSuccess,
-                Message = IsSuccess ? null : "ذخیره اطلاعات با خطا همراه بوده است!"
+                Message = IsSuccess ? null : "ذخیره اطلاعات با خطا همراه بوده است!",
+                Model = IsSuccess ? IdProperty : null
             };
         }
 
@@ -65,10 +68,12 @@ namespace BLL
         {
             await UOW.Entities.AddAsync(entity);
             var IsSuccess = await UOW.CommitAsync();
+            var IdProperty = entity.GetType().GetProperty("Id").GetValue(entity, null);
             return new BaseResult
             {
                 Status = IsSuccess,
-                Message = IsSuccess ? null : "ذخیره اطلاعات با خطا همراه بوده است!"
+                Message = IsSuccess ? null : "ذخیره اطلاعات با خطا همراه بوده است!",
+                Model = IsSuccess ? IdProperty : null
             };
         }
 
@@ -115,7 +120,7 @@ namespace BLL
             return new BaseResult
             {
                 Status = IsSuccess,
-                Message = IsSuccess ? null : "ذخیره اطلاعات با خطا همراه بوده است!"
+                Message = IsSuccess ? "ذخیره اطلاعات با موفقیت انجام شد." : "ذخیره اطلاعات با خطا همراه بوده است!"
             };
         }
 

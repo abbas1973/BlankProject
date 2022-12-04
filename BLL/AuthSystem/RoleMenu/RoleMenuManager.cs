@@ -2,15 +2,16 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using DTO.Base;
+using Infrastructure.Data;
 
 namespace BLL
 {
     /// <summary>
     /// مدیریت منوهای قابل دسترسی هر نقش
     /// </summary>
-    public class RoleMenuManager : Manager<RoleMenu>, IRoleMenuManager
+    public class RoleMenuManager : Manager<RoleMenu, ApplicationContext>, IRoleMenuManager
     {
-        public RoleMenuManager(DbContext _Context) : base(_Context)
+        public RoleMenuManager(DbContexts _Context) : base(_Context)
         {
         }
 
