@@ -1,0 +1,13 @@
+﻿@using Services.SessionServices
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var User = Context.Session.GetUser();
+}
+
+<div class="col-md-12">
+    <h3 class="text-center"><b class="text-danger">نمونه سایت خالی</b></h3>
+</div>
+
+
+
