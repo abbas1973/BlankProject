@@ -12,22 +12,10 @@ namespace Domain.Enums
     /// </summary>
     public enum UserType
     {
-        [Description("سوپر ادمین")]
-        SuperAdmin = 0,
-
-        [Description("سوپروایزر")]
-        Supervisor = 1,
-
-        [Description("شاپر")]
-        Shopper = 2,
-
-        //[Description("مسئول پیک")]
-        //HeadOfDelivery = 3,
-
-        [Description("پیک")]
-        Delivery = 4,
-
         [Description("سایر")]
-        Other = 5
+        Other = 0,
+
+        [Description("سوپر ادمین")]
+        SuperAdmin = 1
     }
 }

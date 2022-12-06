@@ -39,7 +39,7 @@ namespace BLL
         /// <param name="Username">نام کاربری</param>
         /// <param name="Password">کلمه عبور</param>
         /// <returns></returns>
-        public BaseResult Login(string? Username = null, string? Password = null, int? UserId = null)
+        public BaseResult Login(string Username = null, string Password = null, int? UserId = null)
         {
             Username = Username?.Trim().ToLower().ToEnglishNumber().ToPersianCharacter();
             string? HashPassword = Password?.GetHash();

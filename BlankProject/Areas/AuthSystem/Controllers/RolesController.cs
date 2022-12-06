@@ -1,11 +1,16 @@
 ﻿using BLL.Interface;
 using Domain.Entities;
+using Domain.Enums;
 using DTO.Base;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Services.RedisService;
+using Utilities.Extentions;
 
 namespace BlankProject.Areas.AuthSystem.Controllers
 {
+
     /// <summary>
     /// مدیریت نقش های کاربران
     /// </summary>
@@ -17,12 +22,14 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         private readonly IRoleMenuManager roleMenuManager;
         private readonly IMenuManager menuManager;
         private readonly IDataTableManager dataTableManager;
-        public RolesController(IRoleManager _roleManager, IMenuManager _menuManager, IRoleMenuManager _roleMenuManager, IDataTableManager _dataTableManager)
+        private readonly IRedisManager Redis;
+        public RolesController(IRedisManager _Redis, IRoleManager _roleManager, IMenuManager _menuManager, IRoleMenuManager _roleMenuManager, IDataTableManager _dataTableManager)
         {
             roleManager = _roleManager;
             menuManager = _menuManager;
             roleMenuManager = _roleMenuManager;
             dataTableManager = _dataTableManager;
+            Redis = _Redis;
         }
 
 
@@ -57,6 +64,7 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         /// <returns></returns>
         public IActionResult LoadCreateForm()
         {
+            ViewData["RoleType"] = new SelectList(EnumExtensions.ToEnumViewModel<UserType>(), "Id", "Title");
             var model = new Role();
             return PartialView("_Create", model);
         }
@@ -64,16 +72,20 @@ namespace BlankProject.Areas.AuthSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Role role)
+        public async Task<IActionResult> Create(Role model)
         {
             if (ModelState.IsValid)
             {
-                var res = await roleManager.CreateAsync(role);
+                var res = await roleManager.CreateAsync(model);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Roles, res.Status,
+                    res.Status ? $"نقش {model.Title} با آیدی {(long?)res.Model} : " + res.Message : res.Message,
+                    res.Status ? (long?)res.Model : null).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Roles, false, string.Join("/", errors)).Result;
                 return Json(new
                 {
                     Status = false,
@@ -92,6 +104,7 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         public IActionResult LoadEditForm(long id)
         {
             var role = roleManager.GetById(id);
+            ViewData["RoleType"] = new SelectList(EnumExtensions.ToEnumViewModel<UserType>(), "Id", "Title");
             return PartialView("_Edit", role);
         }
 
@@ -99,16 +112,18 @@ namespace BlankProject.Areas.AuthSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Role role)
+        public IActionResult Edit(Role model)
         {
             if (ModelState.IsValid)
             {
-                var res = roleManager.Update(role);
+                var res = roleManager.Update(model);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Roles, res.Status, $"نقش {model.Title} با آیدی {model.Id} : " + res.Message, model.Id).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Roles, false, $"نقش {model.Title} با آیدی {model.Id} : " + string.Join("/", errors), model.Id).Result;
                 return Json(new
                 {
                     Status = false,
@@ -144,10 +159,13 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         [HttpPost]
         public IActionResult SaveAccess(long RoleId, List<long> MenuIds)
         {
-            var xxx = HttpContext.Request;
             if (MenuIds.Count == 0)
+            {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.AccessRoleMenu, MenuType.Roles, false, $"نقش با آیدی {RoleId} : " + "منویی انتخاب نشده است!").Result;
                 return Json(new BaseResult(false, "منویی انتخاب نشده است!"));
+            }
             var res = roleMenuManager.UpdateRoleMenus(RoleId, MenuIds);
+            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.AccessRoleMenu, MenuType.Roles, res.Status, $"نقش با آیدی {RoleId} : " + res.Message, RoleId).Result;
             return Json(res);
         }
         #endregion
@@ -161,10 +179,11 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         {
             if (id == 0)
                 return Json(new { Status = false });
-            var role = roleManager.GetById(id);
-            role.IsEnabled = !role.IsEnabled;
-            var res = roleManager.Update(role);
-            return Json(new { res.Status, role.IsEnabled });
+            var model = roleManager.GetById(id);
+            model.IsEnabled = !model.IsEnabled;
+            var res = roleManager.Update(model);
+            _ = Redis.db.SetLog(Redis.ContextAccessor, (model.IsEnabled ? ActionType.Enable : ActionType.Disable), MenuType.Roles, res.Status, $"نقش {model.Title} با آیدی {id} : " + res.Message, id).Result;
+            return Json(new { res.Status, model.IsEnabled });
         }
         #endregion
 
@@ -174,6 +193,7 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         public IActionResult Delete(long id)
         {
             var res = roleManager.DeleteWithMenus(id);
+            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Roles, res.Status, $"نقش با آیدی {id} : " + res.Message, id).Result;
             return Json(res);
         }
         #endregion

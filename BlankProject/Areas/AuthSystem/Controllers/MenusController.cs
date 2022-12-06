@@ -1,10 +1,13 @@
 ﻿using BLL.Interface;
 using Domain.Entities;
+using Domain.Enums;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
+using Services.RedisService;
 
 namespace BlankProject.Areas.AuthSystem.Controllers
 {
+
     /// <summary>
     /// مدیریت منو های مشتریان
     /// </summary>
@@ -13,9 +16,11 @@ namespace BlankProject.Areas.AuthSystem.Controllers
     public class MenusController : Controller
     {
         private readonly IMenuManager menuManager;
-        public MenusController(IMenuManager _menuManager)
+        private readonly IRedisManager Redis;
+        public MenusController(IRedisManager _Redis, IMenuManager _menuManager)
         {
             menuManager = _menuManager;
+            Redis = _Redis;
         }
 
         #region نمایش همه
@@ -58,19 +63,30 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         /// <summary>
         /// ایجاد منو جدید
         /// </summary>
-        /// <param name="menu">منو</param>
+        /// <param name="model">منو</param>
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Menu menu)
+        public IActionResult Create(Menu model)
         {
             if (ModelState.IsValid)
             {
-                var res = menuManager.Create(menu);
+                var res = menuManager.Create(model);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Menus, res.Status,
+                    res.Status ? $"منو {model.Title} با آیدی {(long?)res.Model} : " + res.Message : res.Message,
+                    res.Status ? (long?)res.Model : null).Result;
                 return Json(new { res.Status, res.Message });
             }
             else
-                return Json(new { Status = false, Message = "اطلاعات وارد شده صحیح نمی باشد!" });
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Menus, false, string.Join("/", errors)).Result;
+                return Json(new
+                {
+                    Status = false,
+                    Message = string.Join("</br>", errors)
+                });
+            }
         }
         #endregion
 
@@ -93,15 +109,24 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Menu menu)
+        public IActionResult Edit(Menu model)
         {
             if (ModelState.IsValid)
             {
-                var res = menuManager.Update(menu);
+                var res = menuManager.Update(model);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Menus, res.Status, $"منو {model.Title} با آیدی {model.Id} : " + res.Message, model.Id).Result;
                 return Json(new { res.Status, res.Message });
             }
             else
-                return Json(new { Status = false, Message = "اطلاعات وارد شده صحیح نمی باشد!" });
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Menus, false, $"منو {model.Title} با آیدی {model.Id} : " + string.Join("/", errors)).Result;
+                return Json(new
+                {
+                    Status = false,
+                    Message = string.Join("</br>", errors)
+                });
+            }
         }
 
         #endregion
@@ -118,9 +143,12 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         {
             var HasChild = menuManager.HasChild(id);
             if (HasChild)
+            {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Menus, false, $"منو با آیدی {id} : " + "لطفا ابتدا زیر مجموعه های این منو را حذف کنید!").Result;
                 return Json(new { Status = false, Message = "لطفا ابتدا زیر مجموعه های این منو را حذف کنید!" });
-
+            }
             var res = menuManager.DeleteWithRoles(id);
+            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Menus, res.Status, $"منو با آیدی {id} : " + res.Message, id).Result;
             return Json(res);
         }
         #endregion

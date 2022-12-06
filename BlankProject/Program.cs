@@ -142,6 +142,10 @@ services.AddScoped<IUserManager, UserManager>();
 #endregion
 
 
+#region LogSystem
+services.AddScoped<IUserLogManager, UserLogManager>();
+#endregion
+
 #endregion
 
 

@@ -1,11 +1,14 @@
 ﻿using BLL.Interface;
+using Domain.Enums;
 using DTO.User;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
+using Services.RedisService;
 using Services.SessionServices;
 
 namespace BlankProject.Areas.Admin.Controllers
 {
+
     /// <summary>
     /// پروفایل کاربر
     /// </summary>
@@ -17,9 +20,14 @@ namespace BlankProject.Areas.Admin.Controllers
     {
         private readonly IUserManager userManager;
         private readonly ISession session;
-        public ProfileController(IUserManager _userManager, IHttpContextAccessor _httpContextAccessor)
+        private readonly IRedisManager Redis;
+        private readonly IHttpContextAccessor httpContextAccessor;
+
+        public ProfileController(IUserManager _userManager, IHttpContextAccessor _httpContextAccessor, IRedisManager _Redis)
         {
             userManager = _userManager;
+            httpContextAccessor = _httpContextAccessor;
+            Redis = _Redis;
             session = _httpContextAccessor.HttpContext.Session;
         }
 
@@ -41,11 +49,13 @@ namespace BlankProject.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 var res = userManager.UpdateProfile(model);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Profile, res.Status, $"کاربر {model.Username} با آیدی {model.Id} : " + res.Message, model.Id).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Profile, false, $"کاربر {model.Username} با آیدی {model.Id} : " + string.Join("/", errors), model.Id).Result;
                 return Json(new
                 {
                     Status = false,
@@ -74,17 +84,20 @@ namespace BlankProject.Areas.Admin.Controllers
             var captcha = HttpContext.Session.GetString("Captcha");
             if (string.IsNullOrEmpty(captcha) || captcha != Captcha)
             {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ChangePassword, MenuType.Profile, false, $"کاربر با آیدی {model.Id} : " + "کد امنیتی صحیح نیست!", model.Id).Result;
                 return Json(new { Status = false, Message = "کد امنیتی صحیح نیست!" });
             }
 
             if (ModelState.IsValid)
             {
                 var res = userManager.ProfileChangePassword(model);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ChangePassword, MenuType.Profile, res.Status, $"کاربر با آیدی {model.Id} : " + res.Message, model.Id).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Profile, false, $"کاربر با آیدی {model.Id} : " + string.Join("/", errors), model.Id).Result;
                 return Json(new
                 {
                     Status = false,

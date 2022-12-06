@@ -10,16 +10,16 @@ namespace BLL.Interface
     /// </summary>
     public interface IAuthManager : IManager<User, ApplicationContext>
     {
-        
+
         /// <summary>
         /// لاگین کاربر
         /// </summary>
         /// <param name="Username">نام کاربری</param>
         /// <param name="Password">کلمه عبور</param>
         /// <returns></returns>
-        BaseResult Login(string? Username = null, string? Password = null, int? UserId = null);
+        BaseResult Login(string Username = null, string Password = null, int? UserId = null);
 
-     
+
         /// <summary>
         /// لاگ اوت کاربر
         /// </summary>

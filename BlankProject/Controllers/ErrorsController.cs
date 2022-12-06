@@ -1,7 +1,9 @@
-﻿using DTO.Base;
+﻿using Domain.Enums;
+using DTO.Base;
 using DTO.ExceptionHandling;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Services.RedisService;
 
 namespace BlankProject.Controllers
 {
@@ -12,9 +14,11 @@ namespace BlankProject.Controllers
     public class ErrorsController : Controller
     {
         private readonly string MainSiteUrl;
-        public ErrorsController(IConfiguration iConfig)
+        private readonly IRedisManager Redis;
+        public ErrorsController(IRedisManager _Redis, IConfiguration iConfig)
         {
             MainSiteUrl = iConfig.GetSection("MainSiteUrl").Value?.Trim();
+            Redis = _Redis;
         }
 
 
@@ -32,15 +36,22 @@ namespace BlankProject.Controllers
                 code = (int)httpException.Status;
                 title = httpException.Title;
             }
-            
+
             Response.StatusCode = code;
 
             ViewBag.MainSiteUrl = MainSiteUrl;
             // اگر درخواست از نوع اجکس بود
             if (HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ServerError, MenuType.ErrorPage, false, $"Error handler - ajax method GET - کد خطا : {code} - عنوان : {title} - شرح : {exception.Message}").Result;
                 return Json(new BaseResult(false, exception.Message));
+            }
             else // درخواست غیر اجکس
+            {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ServerError, MenuType.ErrorPage, false, $"Error handler - method GET - کد خطا : {code} - عنوان : {title} - شرح : {exception.Message}").Result;
                 return View("ErrorPage", new ErrorPageDTO(code.ToString(), title, exception.Message));
+            }
+
         }
 
 
@@ -61,13 +72,20 @@ namespace BlankProject.Controllers
             }
 
             Response.StatusCode = code;
-            
+
             ViewBag.MainSiteUrl = MainSiteUrl;
+
             // اگر درخواست از نوع اجکس بود
             if (HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ServerError, MenuType.ErrorPage, false, $"Error handler - ajax method POST - کد خطا : {code} - عنوان : {title} - شرح : {exception.Message}").Result;
                 return Json(new BaseResult(false, exception.Message));
+            }
             else // درخواست غیر اجکس
+            {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ServerError, MenuType.ErrorPage, false, $"Error handler - method POST - کد خطا : {code} - عنوان : {title} - شرح : {exception.Message}").Result;
                 return View("ErrorPage", new ErrorPageDTO(code.ToString(), title, exception.Message));
+            }
         }
 
     }
