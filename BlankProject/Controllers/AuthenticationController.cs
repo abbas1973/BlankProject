@@ -1,6 +1,7 @@
 ﻿using BLL.Interface;
 using DTO.User;
 using Microsoft.AspNetCore.Mvc;
+using Services.CookieServices;
 using Services.RedisService;
 using Services.SessionServices;
 using Utilities.Extentions;
@@ -90,9 +91,17 @@ namespace BlankProject.Controllers
                 }
             }
 
+            #region اطلاعات ردیس و کوکی
             var User = res.Model as UserSessionDTO;
+            // افزودن لاگ برای لاگین موفق
             await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, true, $"کاربر {User.FullName} وارد شد.");
+            // حذف اطلاعات مربوط به کنترل تعداد دفعات تلاش برای لاگین
             await Redis.db.RemoveLoginLog(Mobile);
+            // افزودن توکن کاربر به ردیس برای جلوگیری 
+            var token = await Redis.db.SetLoginToken(User.Id);
+            // افزودن توکن به کوکی
+            HttpContext.SetCookieUserToken(token);
+            #endregion
 
             if (!string.IsNullOrEmpty(RetUrl))
                 return Redirect(RetUrl);

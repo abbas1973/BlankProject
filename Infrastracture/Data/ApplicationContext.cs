@@ -9,7 +9,7 @@ namespace Infrastructure.Data
 {
     public class ApplicationContext : DbContext
     {
-        private readonly int LastMenuId = 5;
+        private readonly int LastMenuId = 9;
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
@@ -155,6 +155,58 @@ namespace Infrastructure.Data
             });
             #endregion
 
+
+            #region لاگ ها
+            Menus.Add(new Menu
+            {
+                Id = 6,
+                Title = "لاگ ها",
+                Sort = 10,
+                ParentId = null,
+                MaterialIcon = "assignment",
+                HasLink = false,
+                CreateDate = new DateTime(2022, 7, 25)
+            });
+
+            Menus.Add(new Menu
+            {
+                Id = 7,
+                Title = "پیام های ارسالی",
+                Area = "logsystem",
+                Controller = "smslogs",
+                Action = "index",
+                Sort = 1,
+                ParentId = 6,
+                MaterialIcon = null,
+                CreateDate = new DateTime(2022, 7, 25)
+            });
+
+            Menus.Add(new Menu
+            {
+                Id = 8,
+                Title = "ورود و خروج کاربران",
+                Area = "logsystem",
+                Controller = "loginlogs",
+                Action = "index",
+                Sort = 3,
+                ParentId = 6,
+                MaterialIcon = null,
+                CreateDate = new DateTime(2022, 11, 17)
+            });
+
+            Menus.Add(new Menu
+            {
+                Id = 9,
+                Title = "عملیات کاربران",
+                Area = "logsystem",
+                Controller = "actionlogs",
+                Action = "index",
+                Sort = 4,
+                ParentId = 6,
+                MaterialIcon = null,
+                CreateDate = new DateTime(2022, 11, 17)
+            });
+            #endregion
             modelBuilder.Entity<Menu>()
                        .HasData(Menus);
         }

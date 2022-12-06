@@ -4,19 +4,19 @@ using StackExchange.Redis.Extensions.Core.Abstractions;
 namespace Services.RedisService
 {
     /// <summary>
-    /// بررسی تعداد لاگین کاربر های مختلف و بلاک کردن بعد از 5 بار تلاش نا موفق
+    /// ذخیره توکن کاربر برای جلوگیری لاگین همزمان 2 نفر با یک اکانت
     /// </summary>
-    public static class RedisLoginLogManager
+    public static class RedisLoginTokenManager
     {
         /// <summary>
         /// کلید پیشفرض 
         /// </summary>
-        public static readonly string Key = "UserLogin:";
+        public static readonly string Key = "UserToken:";
 
         /// <summary>
         /// مدت زمان ماندگاری در ردیس
         /// </summary>
-        public static readonly int ExpMin = 20;
+        public static readonly int ExpMin = 300;
 
 
 
@@ -24,12 +24,12 @@ namespace Services.RedisService
         /// گرفتن رکورد مربوط به یوزرنیم خاص
         /// </summary>
         /// <param name="db">دیتابیس ردیس</param>
-        /// <param name="Username">نام کاربری</param>
-        public static async Task<LoginLogDTO> GetLoginLog(this IRedisDatabase db, string Username)
+        /// <param name="UserId">نام کاربری</param>
+        public static async Task<string> GetLoginToken(this IRedisDatabase db, long UserId)
         {
             try
             {
-                return await db.GetAsync<LoginLogDTO>(Key + Username);
+                return await db.GetAsync<string>(Key + UserId);
             }
             catch
             {
@@ -44,27 +44,21 @@ namespace Services.RedisService
         /// افزودن اطلاعات نام کاربری به ردیس
         /// </summary>
         /// <param name="db">دیتابیس ردیس</param>
-        /// <param name="Username">نام کاربری</param>
+        /// <param name="UserId">نام کاربری</param>
         /// <param name="expMin">مدت زمان اعتبار</param>
         /// <returns></returns>
-        public static async Task<LoginLogDTO> SetLoginLog(this IRedisDatabase db, string Username, int? expMin = null)
+        public static async Task<string> SetLoginToken(this IRedisDatabase db, long UserId, int? expMin = null)
         {
             try
             {
-                var log = await db.GetLoginLog(Username);
-                if (log != null)
-                {
-                    await db.RemoveLoginLog(Username);
-                    log.Count += 1;
-                    if(log.Count <= 5)
-                        log.CreateDate = DateTime.Now;
-                }
-                else
-                    log = new LoginLogDTO(1);
+                var token = await db.GetLoginToken(UserId);
+                if (!string.IsNullOrEmpty(token))
+                    await db.RemoveLoginToken(UserId);
 
-                var isSuccess = await db.AddAsync(Key + Username, log, DateTimeOffset.Now.AddMinutes(expMin ?? ExpMin));
+                token = Guid.NewGuid().ToString();
+                var isSuccess = await db.AddAsync(Key + UserId, token, DateTimeOffset.Now.AddMinutes(expMin ?? ExpMin));
                 if(isSuccess)
-                    return log;
+                    return token;
                 return null;
             }
             catch
@@ -80,13 +74,13 @@ namespace Services.RedisService
         /// حذف لاگ نام کاربری از ردیس
         /// </summary>
         /// <param name="db">دیتابیس ردیس</param>
-        /// <param name="Username">نام کاربری</param>
+        /// <param name="UserId">نام کاربری</param>
         /// <returns></returns>
-        public static async Task<bool> RemoveLoginLog(this IRedisDatabase db, string Username)
+        public static async Task<bool> RemoveLoginToken(this IRedisDatabase db, long UserId)
         {
             try
             {
-                return await db.RemoveAsync(Key + Username);
+                return await db.RemoveAsync(Key + UserId);
             }
             catch
             {
