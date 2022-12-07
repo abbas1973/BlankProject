@@ -36,6 +36,10 @@ namespace DAL
         #region LogSystem
         private UserLogRepository _userLogs;
         #endregion
+
+        #region Shared
+        private ConstantRepository _constants;
+        #endregion
         #endregion
 
 
@@ -98,6 +102,19 @@ namespace DAL
 
         #endregion
 
+
+        #region Shared
+        public IConstantRepository Constants
+        {
+            get
+            {
+                if (_constants == null)
+                    _constants = new ConstantRepository(applicationContext);
+                return _constants;
+            }
+        }
+
+        #endregion
         #endregion
 
 

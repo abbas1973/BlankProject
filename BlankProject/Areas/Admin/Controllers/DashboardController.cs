@@ -15,18 +15,22 @@ namespace BlankProject.Areas.Admin.Controllers
     {
         private readonly IMemoryCache cache;
         private readonly IUserManager userManager;
+        private readonly IUserLogManager UserLogManager;
         private readonly ISession session;
-        public DashboardController(IUserManager _userManager, IHttpContextAccessor _httpContextAccessor, IMemoryCache _cache)
+        public DashboardController(IUserManager _userManager, IUserLogManager userLogManager, IHttpContextAccessor _httpContextAccessor, IMemoryCache _cache)
         {
             userManager = _userManager;
             cache = _cache;
             session = _httpContextAccessor.HttpContext.Session;
+            UserLogManager = userLogManager;
         }
 
 
         public IActionResult Index()
         {
-            return View();
+            var User = HttpContext.Session.GetUser();
+            var lastLoginLog = UserLogManager.GetUserLastLogin(User.Username);
+            return View(lastLoginLog);
         }
 
 

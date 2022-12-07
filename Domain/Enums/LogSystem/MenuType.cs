@@ -31,5 +31,10 @@ namespace Domain.Enums
         [Description("لاگ لاگین")]
         LoginLog = 7,
 
+        [Description("تنظیمات")]
+        Constants = 8,
+
+
+
     }
 }

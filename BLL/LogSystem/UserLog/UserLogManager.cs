@@ -91,5 +91,21 @@ namespace BLL
         }
 
 
+
+
+        /// <summary>
+        /// گرفتن آخرین لاگ لاگین کاربر
+        /// </summary>
+        /// <param name="UserId">آیدی کاربر</param>
+        /// <returns></returns>
+        public UserLog GetUserLastLogin(string Username)
+        {
+            return UOW.UserLogs.Get(x => x.FullName == Username && x.ActionType == ActionType.Login && x.MenuType == MenuType.Login, x => x.OrderByDescending(z => z.Id), 1, 1).FirstOrDefault();
+        }
+
+
+
+
+
     }
 }

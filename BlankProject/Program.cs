@@ -146,6 +146,11 @@ services.AddScoped<IUserManager, UserManager>();
 services.AddScoped<IUserLogManager, UserLogManager>();
 #endregion
 
+
+#region Shared
+services.AddScoped<IConstantManager, ConstantManager>();
+#endregion
+
 #endregion
 
 

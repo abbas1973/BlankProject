@@ -41,5 +41,10 @@ namespace Utilities.Extentions
         /// </summary>
         public string Placeholder { get; set; }
 
+
+        /// <summary>
+        /// مقدار پیشفرض برای seed method
+        /// </summary>
+        public string DefultValue { get; set; }
     }
 }

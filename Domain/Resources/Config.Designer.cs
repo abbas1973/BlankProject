@@ -61,6 +61,15 @@ namespace Domain.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to بتاجا.
+        /// </summary>
+        public static string OrgName {
+            get {
+                return ResourceManager.GetString("OrgName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tavana.
         /// </summary>
         public static string SiteNameEn {

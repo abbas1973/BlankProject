@@ -27,6 +27,10 @@
         #endregion
 
 
+        #region Shared
+        IConstantRepository Constants { get; }
+        #endregion
+
 
         bool Commit();
 

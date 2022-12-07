@@ -16,15 +16,17 @@ namespace BlankProject.Controllers
     {
         private readonly IAuthManager AuthManager;
         private readonly IUserLogManager UserLogManager;
+        private readonly IConstantManager ConstantManager;
         private readonly IRedisManager Redis;
         private readonly ISession Session;
 
-        public AuthenticationController(IAuthManager _AuthManager, IUserLogManager _UserLogManager, IRedisManager _Redis) : base()
+        public AuthenticationController(IAuthManager _AuthManager, IUserLogManager _UserLogManager, IRedisManager _Redis, IConstantManager constantManager) : base()
         {
             AuthManager = _AuthManager;
             UserLogManager = _UserLogManager;
             Redis = _Redis;
             Session = Redis.ContextAccessor.HttpContext.Session;
+            ConstantManager = constantManager;
         }
 
 
@@ -61,7 +63,8 @@ namespace BlankProject.Controllers
         public async Task<IActionResult> Index(string Mobile, string Password, string Captcha, string RetUrl)
         {
             var loginLog = await Redis.db.SetLoginLog(Mobile);
-            if (loginLog != null && loginLog.Count > 5)
+            var FailedLoginCount = ConstantManager.GetFailedLoginCount();
+            if (loginLog != null && loginLog.Count > FailedLoginCount)
             {
                 var diff = (int)(loginLog.CreateDate.AddMinutes(20) - DateTime.Now).TotalMinutes;
                 await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, false, $"مسدود شدن حساب کاربری تا {diff} دقیقه دیگر به دلیل {loginLog.Count} بار ورود اشتباه کلمه عبور. ");

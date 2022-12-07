@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastracture.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20221207225434_constants")]
+    partial class constants
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,37 +51,6 @@ namespace Infrastracture.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Constants");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            CreateDate = new DateTime(2022, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "تلفن",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            CreateDate = new DateTime(2022, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "ایمیل",
-                            Type = 1
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            CreateDate = new DateTime(2022, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "آدرس",
-                            Type = 2
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            CreateDate = new DateTime(2022, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "تعداد دفعات مجاز برای ورود ناموفق",
-                            Type = 3,
-                            Value = "5"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Menu", b =>

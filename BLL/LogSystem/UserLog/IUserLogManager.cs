@@ -58,5 +58,13 @@ namespace BLL.Interface
 
 
 
+        /// <summary>
+        /// گرفتن آخرین لاگ لاگین کاربر
+        /// </summary>
+        /// <param name="UserId">آیدی کاربر</param>
+        /// <returns></returns>
+        UserLog GetUserLastLogin(string Username);
+
+
     }
 }
