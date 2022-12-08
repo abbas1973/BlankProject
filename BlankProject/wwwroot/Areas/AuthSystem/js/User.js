@@ -77,7 +77,7 @@ var user = {
                 "order": [0, "desc"],
                 "processing": "true",
                 'columnDefs': [{
-                    'targets': [1,2,3,4,5,6], /* column index */
+                    'targets': [1, 2, 3, 4, 5, 6], /* column index */
                     'orderable': false, /* true or false */
                 }]
 
@@ -277,9 +277,56 @@ var user = {
     },
 
 
-
-
+    // تغییر کلمه عبور کاربر
     profileChangePassword: {
+
+        isPasswordStrength: function (password) {
+            var password_strength = $("#password-text");
+            
+            //TextBox left blank.
+            if (password.length == 0) {
+                password_strength.removeClass('btn-warning btn-success btn-danger').css('width', '1%').html('');
+                return false;
+            }
+
+            //Regular Expressions.
+            var regex = new Array();
+            regex.push("[A-Z]"); //Uppercase Alphabet.
+            regex.push("[a-z]"); //Lowercase Alphabet.
+            regex.push("[0-9]"); //Digit.
+            regex.push("[$@$!%*#?&]"); //Special Character.
+
+            var passed = 0;
+
+            //Validate for each Regular Expression.
+            for (var i = 0; i < regex.length; i++) {
+                if (new RegExp(regex[i]).test(password)) {
+                    passed++;
+                }
+            }
+            
+            switch (passed) {
+                case 0:
+                    password_strength.removeClass('btn-warning btn-success').addClass('btn-danger').css('width', '30%').html('ضعیف');
+                    break;
+                case 1:
+                    password_strength.removeClass('btn-warning btn-success').addClass('btn-danger').css('width', '30%').html('ضعیف');
+                    break;
+                case 2:
+                    password_strength.removeClass('btn-warning btn-success').addClass('btn-danger').css('width', '30%').html('ضعیف');
+                    break;
+                case 3:
+                    password_strength.removeClass('btn-danger btn-success').addClass('btn-warning').css('width', '60%').html('متوسط');
+                    break;
+                case 4:
+                    password_strength.removeClass('btn-danger btn-warning').addClass('btn-success').css('width', '100%').html('قوی');
+                    break;
+
+            }
+
+        },
+
+
         save: function (e) {
             e.preventDefault();
             var targetUrl = $(".change-pass-form").attr("action");
@@ -287,7 +334,7 @@ var user = {
             /*ولیدیت کردن فرم*/
             var $form = $("form");
             $form.validate();
-            if (!$form.valid()) 
+            if (!$form.valid())
                 return false;
 
             var captcha = $('#captcha').val();
@@ -346,7 +393,7 @@ var user = {
         // لود کردن فرم تغییر کلمه عبور
         loadForm: function (id, fullName) {
             $.get("/AuthSystem/users/LoadChangePasswordForm/" + id,
-                { FullName: fullName},
+                { FullName: fullName },
                 function (res) {
                     $("#modal-form").html(res);
                     $('#base-modal').addClass('small-modal');
@@ -649,7 +696,7 @@ var filter = {
     checkDates: function (start, end) {
         var sdate = start.obj.date;
         var edate = end.obj.date;
-        if (sdate && edate && sdate > edate) { 
+        if (sdate && edate && sdate > edate) {
             showNotification("تاریخ شروع نمیتواند بعد از تاریخ پایان باشد!", 'danger');
             $("input[name=FilterStartDate]").val('').prev('input').val('');
             $("input[name=FilterEndDate]").val('').prev('input').val('');
