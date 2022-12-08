@@ -107,6 +107,20 @@ namespace BLL
 
 
 
+        /// <summary>
+        /// تعداد کاراکترهایی که هنگام تغییر کلمه عبور میتواند با گلمه عبور قبلی مشترک باشد.
+        /// <para>
+        /// مقدار پیشفرض 4 است.
+        /// </para>
+        /// </summary>
+        /// <returns></returns>
+        public int? GetPasswordAllowedSameCharacters()
+        {
+            return UOW.Constants.GetPasswordAllowedSameCharacters();
+        }
+
+
+
 
 
         /// <summary>
