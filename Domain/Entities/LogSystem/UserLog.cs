@@ -52,6 +52,7 @@ namespace Domain.Entities
         public long? TargetId { get; set; }
 
 
+
         #region کلاس های سازنده
 
         /// <summary>

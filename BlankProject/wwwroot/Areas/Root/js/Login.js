@@ -16,11 +16,13 @@ var Validate = function () {
         return false;
     }
 
-    var captcha = $('#captcha').val();
-    if (!captcha) {
-        $('.error').html('کد امنیتی را وارد کنید!');
-        isSubmited = false;
-        return false;
+    if ($('#captcha').length > 0) {
+        var captcha = $('#captcha').val();
+        if (!captcha) {
+            $('.error').html('کد امنیتی را وارد کنید!');
+            isSubmited = false;
+            return false;
+        }
     }
 
     //if (!validLogin()) return false;

@@ -1,4 +1,5 @@
-﻿using DTO.User;
+﻿using DTO.Menu;
+using DTO.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -47,18 +48,6 @@ namespace Filters
                         + context.HttpContext.Request.QueryString;
 
 
-            #region کاربر تست برای لاگین
-            //var controller = context.Controller as Controller;
-            //var User = new UserSessionDTO
-            //{
-            //    FullName = "عباس محمدنژاد",
-            //    Id = 1,
-            //    Mobile = "09359785415"
-            //};
-            //controller.HttpContext.Session.SetUser(User);
-            #endregion
-
-
             #region اگر ادمین درون سشن نباشد کاربر به صفحه لاگین ریدایرکت میشود
             var controllerObj = context.Controller as Controller;
             var User = controllerObj?.HttpContext.Session.GetUser();
@@ -88,12 +77,11 @@ namespace Filters
             #endregion
 
 
+
             #region بررسی دسترسی کاربر درون سشن به بخش مورد نظر
-            //// آیا کاربر دسترسی لازم را دارد؟
-            bool _HasPermission = isPublic ? true : HasPermission(context, User);
+            var menu = HasPermission(context, User);
 
-
-            if (!_HasPermission)
+            if (!isPublic && menu == null)
             {
                 if (IsAjaxRequest(context))
                 {
@@ -103,6 +91,19 @@ namespace Filters
                 else
                     context.Result = new RedirectToActionResult("Index", "Forbidden", new { area = "Admin" });
                 return;
+            }
+            #endregion
+
+
+            #region آیا منو مورد نظر نیاز به احراز هویت مجدد دارد؟
+            if(menu != null && menu.NeedReAuthorize)
+            {
+                if (!IsAjaxRequest(context))
+                {
+                    var isAuthorized =  Redis.db.UserHasReAuthorizeMenu(menu.Id, User.Id).Result;
+                    if (!isAuthorized)
+                        context.Result = new RedirectToActionResult("Index", "Authentication", new { area = "", RetUrl = url, mid = menu.Id });
+                }
             }
             #endregion
 
@@ -124,15 +125,8 @@ namespace Filters
 
 
         #region بررسی دسترسی کاربر 
-        public bool HasPermission(ActionExecutingContext context, UserSessionDTO User)
+        public MenuSessionDTO HasPermission(ActionExecutingContext context, UserSessionDTO User)
         {
-
-            #region اگر دسترسی خاصی مد نظر نبود، تنها لاگین کاربر کافیست
-            if (isPublic)
-                return true;
-            #endregion
-
-
             #region بررسی دسترسی به منو
             #region اگر پارامترهای ادرس مشخص نشده باشد، دسترسی کاربر به ادرس درخواست شده بررسی می شود
             var controllerObj = context.Controller as Controller;
@@ -155,8 +149,8 @@ namespace Filters
             }
             #endregion
 
-            var isExist = User.Menus.Any(x => x.Area == area && x.Controller == controller && x.Action == action);
-            return isExist;
+            var menu = User.Menus.FirstOrDefault(x => x.Area == area && x.Controller == controller && x.Action == action);
+            return menu;
             #endregion
         }
         #endregion

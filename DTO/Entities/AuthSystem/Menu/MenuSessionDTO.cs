@@ -34,7 +34,7 @@ namespace DTO.Menu
 
 
         [Display(Name = "عنوان آیکن متریال")]
-        public string? Icon { get; set; }
+        public string Icon { get; set; }
 
 
         /// <summary>
@@ -53,27 +53,34 @@ namespace DTO.Menu
         public bool HasLink { get; set; }
 
 
+        /// <summary>
+        /// آیا دسترسی به منو مربوطه نیاز به احراز هویت مجدد دارد؟
+        /// </summary>
+        [Display(Name = "نیاز به احراز هویت مجدد دارد؟")]
+        public bool NeedReAuthorize { get; set; }
+
+
 
         #region پروپرتی های مربوط به ایجاد لینک منو
         /// <summary>
         /// نام اریایی که با کلیک بر روی منو باید اجرا شود
         /// </summary>
         [Display(Name = "اریا")]
-        public string? Area { get; set; }
+        public string Area { get; set; }
 
 
         /// <summary>
         /// نام کنترلری که با کلیک بر روی منو باید اجرا شود
         /// </summary>
         [Display(Name = "کنترلر")]
-        public string? Controller { get; set; }
+        public string Controller { get; set; }
 
 
         /// <summary>
         /// نام اکشنی که با کلیک بر روی منو باید اجرا شود
         /// </summary>
         [Display(Name = "اکشن")]
-        public string? Action { get; set; }
+        public string Action { get; set; }
 
 
         /// <summary>
@@ -81,7 +88,7 @@ namespace DTO.Menu
         /// و پس از تبدیل به رشته ذخیره می گردد
         /// </summary>
         [Display(Name = "پارامترهای آدرس")]
-        public string? Parameters { get; set; }
+        public string Parameters { get; set; }
 
 
 
@@ -103,7 +110,7 @@ namespace DTO.Menu
         /// <summary>
         /// منو های زیر دسته
         /// </summary>
-        public IEnumerable<MenuSessionDTO>? SubMenus { get; set; }
+        public IEnumerable<MenuSessionDTO> SubMenus { get; set; }
 
 
 
@@ -121,6 +128,7 @@ namespace DTO.Menu
                     Icon = model.MaterialIcon,
                     Order = model.Sort,
                     ShowInMenu = model.ShowInMenu,
+                    NeedReAuthorize= model.NeedReAuthorize,
                     Area = model.Area,
                     Controller = model.Controller,
                     Action = model.Action,
@@ -149,6 +157,7 @@ namespace DTO.Menu
                     Order = model.Menu.Sort,
                     ShowInMenu = model.Menu.ShowInMenu,
                     Area = model.Menu.Area,
+                    NeedReAuthorize = model.Menu.NeedReAuthorize,
                     Controller = model.Menu.Controller,
                     Action = model.Menu.Action,
                     Parameters = model.Menu.Parameters
