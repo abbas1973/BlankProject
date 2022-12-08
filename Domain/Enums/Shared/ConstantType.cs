@@ -32,6 +32,15 @@ namespace Domain.Enums
         FailedLoginCount = 3,
 
 
+
+        /// <summary>
+        /// کاربر هر چند روز باید کلمه عبور خود را عوض کند
+        /// </summary>
+        [CustomDataType(Type = CustomDataType.Number, Min = 0, Placeholder = "کاربر هر چند روز باید کلمه عبور خود را تغییر دهد.", DefultValue = "60")]
+        [Description("اجبار تغییر کلمه عبور کاربر بعد از چند روز؟")]
+        ChangePasswordCycle = 4,
+
+
     }
 
 

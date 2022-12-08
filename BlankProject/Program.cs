@@ -23,11 +23,14 @@ services.AddRazorPages();
 
 
 #region DB Context
-var connectionString = builder.Configuration.GetConnectionString("ApplicationContext");
+// Main DB Connection String
+var connectionString = builder.Configuration.GetConnectionString("ApplicationContext"); // خوندن از appsetting
+//var connectionString = builder.Configuration["ConnectionStrings:ApplicationContext"]; // خوندن از user secret
 services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connectionString)/*, ServiceLifetime.Transient*/);
 
-// Log Connection
-var logConnectionString = builder.Configuration.GetConnectionString("LogContext");
+// Log DB Connection String
+var logConnectionString = builder.Configuration.GetConnectionString("LogContext"); // خوندن از appsetting
+//var logConnectionString = builder.Configuration["ConnectionStrings:LogContext"]; // خوندن از user secret
 services.AddDbContext<LogContext>(options => options.UseSqlServer(logConnectionString));
 #endregion
 

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using DTO.Base;
 using DTO.DataTable;
 using Infrastructure.Data;
@@ -34,6 +35,28 @@ namespace BLL.Interface
         int GetFailedLoginCount();
 
 
+
+
+
+        /// <summary>
+        /// کاربر هر چند روز کلمه عبور را تغییر دهد
+        /// <para>
+        /// مقدار پیشفرض 60 است.
+        /// </para>
+        /// </summary>
+        /// <returns></returns>
+        int? GetChangePasswordCycle();
+
+
+
+
+
+        /// <summary>
+        /// خواندن مقدار عددی از مقادیر ثابت
+        /// </summary>
+        /// <param name="Type">نوع مقادیر ثابت مورد نظر</param>
+        /// <returns></returns>
+        int? GetNumberValue(ConstantType Type);
 
     }
 }

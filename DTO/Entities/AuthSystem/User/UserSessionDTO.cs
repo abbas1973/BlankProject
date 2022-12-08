@@ -38,6 +38,13 @@ namespace DTO.User
 
 
         /// <summary>
+        /// کاربر هر چند روز باید کلمه عبور خود را عوض کند
+        /// </summary>
+        [Display(Name = "دوره تغییر کلمه عبور")]
+        public int? ChangePasswordCycle { get; set; }
+
+
+        /// <summary>
         /// منوهای دسترسی کاربر بدون حالت درختی
         /// </summary>
         public IEnumerable<MenuSessionDTO> Menus { get; set; }
@@ -65,6 +72,7 @@ namespace DTO.User
                     RoleId = model.RoleId,
                     Role = model.Role.Title,
                     Type = model.Type,
+                    ChangePasswordCycle = model.ChangePasswordCycle,
                     PasswordIsChanged = model.PasswordIsChanged,
                     Menus = model.Role.Menus.AsQueryable()
                                        .Where(x => x.Menu.IsEnabled /*&& x.Menu.ForCustomer == model.IsCustomer*/)

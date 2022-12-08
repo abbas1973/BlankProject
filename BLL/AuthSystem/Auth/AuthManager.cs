@@ -1,7 +1,6 @@
 ﻿using BLL.Interface;
 using Domain.Entities;
 using DTO.User;
-using Microsoft.EntityFrameworkCore;
 using DTO.Base;
 using Microsoft.AspNetCore.Http;
 using Utilities;
@@ -10,6 +9,7 @@ using DTO.Menu;
 using Utilities.Extentions;
 using Services.SessionServices;
 using Infrastructure.Data;
+using Domain.Enums;
 
 namespace BLL
 {
@@ -22,8 +22,6 @@ namespace BLL
     {
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ISession Session;
-
-
 
         public AuthManager(DbContexts _Context, IHttpContextAccessor _httpContextAccessor) : base(_Context)
         {
@@ -42,18 +40,18 @@ namespace BLL
         public BaseResult Login(string Username = null, string Password = null, int? UserId = null)
         {
             Username = Username?.Trim().ToLower().ToEnglishNumber().ToPersianCharacter();
-            string? HashPassword = Password?.GetHash();
+            string HashPassword = Password?.GetHash();
 
             if (string.IsNullOrEmpty(Username) && string.IsNullOrEmpty(Password) && UserId == null)
                 return new BaseResult { Status = false, Message = "نام کاربری و کلمه عبور را وارد کنید" };
 
+            #region گرفتن اطلاعات کاربر و اعتبار سنجی
             var filter = PredicateBuilder.New<User>(true);
             if (UserId != null)
                 filter.And(x => x.Id == UserId);
             else
                 filter.And(x => x.Username == Username && x.Password == HashPassword);
 
-            // گرفتن اطلاعات کاربر
             var user = UOW.Users.GetOneDTO<UserSessionDTO>(UserSessionDTO.Selector, filter);
 
             if (user == null)
@@ -68,6 +66,24 @@ namespace BLL
                     Status = false,
                     Message = "حساب کاربری شما فعال نمی باشد! </br> جهت فعالسازی با پشتیبانی تماس بگیرید."
                 };
+            #endregion
+
+
+            #region بررسی دوره تغییر کلمه عبور توسط کاربر
+            if (user.PasswordIsChanged)
+            {
+                var changePassCycle = UOW.Constants.GetChangePasswordCycle();
+                if (changePassCycle != null || user.ChangePasswordCycle != null)
+                {
+                    var cycle = Math.Min(changePassCycle ?? 0, user.ChangePasswordCycle ?? 0);
+                    var LastChangePassword = UOW.UserLogs.FirstOrDefault(x => x.IsSuccess && x.MenuType == MenuType.Profile && x.ActionType == ActionType.ChangePassword && x.TargetId == user.Id);
+                    // اگر کلمه عبور را تغییر نداده بود و یا به اندازه یک سیکل از اخرین تغییر آن گذشته بود
+                    if (LastChangePassword == null || LastChangePassword.CreateDate.AddDays(cycle) < DateTime.Now)
+                        user.PasswordIsChanged = false;
+                }
+            }
+            #endregion
+
 
             Session.SetUser(user);
 

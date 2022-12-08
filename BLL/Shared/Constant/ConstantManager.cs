@@ -85,28 +85,42 @@ namespace BLL
         /// <returns></returns>
         public int GetFailedLoginCount()
         {
-            try
-            {
-                var value = UOW.Constants.GetOneDTO(x => x.Value, x => x.Type == ConstantType.FailedLoginCount);
-                if (string.IsNullOrEmpty(value))
-                    return 5;
-
-                int count;
-                if (!int.TryParse(value, out count))
-                    return 5;
-
-                var dataType = ConstantType.FailedLoginCount.GetEnumCustomAttribute();
-                if (count < dataType.Min || count > dataType.Max)
-                    return 5;
-
-                return count;
-            }
-            catch
-            {
-                return 5;
-            }
-
+            return UOW.Constants.GetFailedLoginCount();
         }
+
+
+
+
+
+        /// <summary>
+        /// کاربر هر چند روز کلمه عبور را تغییر دهد
+        /// <para>
+        /// مقدار پیشفرض 60 است.
+        /// </para>
+        /// </summary>
+        /// <returns></returns>
+        public int? GetChangePasswordCycle()
+        {
+            return UOW.Constants.GetFailedLoginCount();
+        }
+
+
+
+
+
+
+        /// <summary>
+        /// خواندن مقدار عددی از مقادیر ثابت
+        /// </summary>
+        /// <param name="Type">نوع مقادیر ثابت مورد نظر</param>
+        /// <returns></returns>
+        public int? GetNumberValue(ConstantType Type)
+        {
+            return UOW.Constants.GetNumberValue(Type);
+        }
+
+
+
 
 
     }

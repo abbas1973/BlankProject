@@ -100,7 +100,7 @@ namespace BLL
         /// <returns></returns>
         public UserLog GetUserLastLogin(string Username)
         {
-            return UOW.UserLogs.Get(x => x.FullName == Username && x.ActionType == ActionType.Login && x.MenuType == MenuType.Login, x => x.OrderByDescending(z => z.Id), 1, 1).FirstOrDefault();
+            return UOW.UserLogs.Get(x => x.IsSuccess && x.FullName == Username && x.ActionType == ActionType.Login && x.MenuType == MenuType.Login, x => x.OrderByDescending(z => z.Id), 1, 1).FirstOrDefault();
         }
 
 

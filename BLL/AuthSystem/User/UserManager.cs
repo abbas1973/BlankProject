@@ -162,6 +162,7 @@ namespace BLL
             User.Mobile = model.Mobile;
             User.Name = model.Name;
             User.Username = model.Username;
+            User.ChangePasswordCycle = model.ChangePasswordCycle;
 
             return base.Update(User);
 

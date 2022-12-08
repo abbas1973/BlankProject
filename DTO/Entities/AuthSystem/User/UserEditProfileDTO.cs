@@ -34,6 +34,12 @@ namespace DTO.User
         public string Mobile { get; set; }
 
 
+        /// <summary>
+        /// کاربر هر چند روز باید کلمه عبور خود را عوض کند
+        /// </summary>
+        [Display(Name = "دوره تغییر کلمه عبور")]
+        public int? ChangePasswordCycle { get; set; }
+
 
 
         /// <summary>
@@ -49,6 +55,7 @@ namespace DTO.User
                     Mobile = model.Mobile,
                     Name = model.Name,
                     Username = model.Username,
+                    ChangePasswordCycle = model.ChangePasswordCycle
                 };
             }
         }

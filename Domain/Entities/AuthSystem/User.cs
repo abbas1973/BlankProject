@@ -57,6 +57,13 @@ namespace Domain.Entities
         public UserType Type { get; set; }
 
 
+        /// <summary>
+        /// کاربر هر چند روز باید کلمه عبور خود را عوض کند
+        /// </summary>
+        [Display(Name = "دوره تغییر کلمه عبور")]
+        public int? ChangePasswordCycle { get; set; }
+
+
         [Display(Name = "ایجاد کننده")]
         public long? CreatorId { get; set; }
         public User Creator { get; set; }
