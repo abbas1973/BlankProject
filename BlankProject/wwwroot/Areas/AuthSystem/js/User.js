@@ -907,7 +907,6 @@ var filter = {
 
 
 
-debugger
 if (controller == 'profile' && action == 'edit')
     breadcrumb.push({ title: "ویرایش پروفایل", link: "#" });
 else if (controller == 'profile' && action == 'changepassword')

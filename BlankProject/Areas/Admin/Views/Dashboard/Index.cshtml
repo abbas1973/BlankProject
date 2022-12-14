@@ -35,3 +35,78 @@
     <div>- مسئولیت حفاظت از داده هایی که در سامانه به شما نمایش داده می شود، به عهده شما می باشد. در حفظ و نگهداری حساب کاربری خود کوشا باشید. </div>
 </div>
 
+
+<!-- چارچوب مدال برای فرم ها -->
+<div class="modal fade modal" id="base-modal" tabindex="-1" role="dialog" aria-labelledby="modal5-label" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="modal-form">
+            <div class="modal-header">
+                <button type="button" class="close" title="بستن پنجره" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div class="clearfix"></div>
+                <div class="text-center">
+                    <h4><b>هشدار سیستم</b></h4>
+                </div>
+                <hr />
+            </div>
+
+            <div class="modal-body row">
+                <div class="col-md-12">
+                    <div class="col-md-10 col-md-offset-1" style="margin-top:30px;">
+                        <i class="material-icons" style="transform: translateY(7px);">event</i>
+                        آخرین ورود شما در تاریخ
+                        <b> @Model.CreateDate.ToPersianDateTime().ToLongDateString()</b>
+                        در ساعت
+                        <b> @Model.CreateDate.ToPersianDateTime().ToLongTimeString()</b>
+                        با آیپی
+                        <b> @Model.UserIp</b>
+                        می باشد.
+                    </div>
+
+                    <div class="col-md-10 col-md-offset-1" style="margin-top:50px; margin-bottom: 20px;">
+                        <div>
+                            <i class="material-icons" style="transform: translateY(7px);">warning</i>
+                            <b>توجه داشته باشید که:</b>
+                        </div>
+                        <div>- تمامی فعالیت های شما در سامانه ثبت گردیده و قابل ردگیری و بازبینی است.</div>
+                        <div>- مسئولیت حفاظت از داده هایی که در سامانه به شما نمایش داده می شود، به عهده شما می باشد. در حفظ و نگهداری حساب کاربری خود کوشا باشید. </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@section Scripts{
+    @{
+        var userAlert = Context.Request.Cookies.ContainsKey("UserAlert");
+    }
+    <script>
+        var popup = function(){
+            var userAlert = '@Context.Request.Cookies.TryGetValue("UserAlert", out string value)';
+            if (userAlert == 'True')
+                modal.open();
+        }
+
+        $('#base-modal').on('hidden.bs.modal', function () {
+            deleteCookie();
+        })
+
+
+        popup();
+
+        function deleteCookie() {
+        @{
+            if (Context.Request.Cookies.ContainsKey("UserAlert"))
+            {
+                Context.Response.Cookies.Delete("UserAlert");
+            }
+        }
+        }
+    </script>
+}

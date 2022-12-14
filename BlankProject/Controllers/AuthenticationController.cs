@@ -134,6 +134,9 @@ namespace BlankProject.Controllers
             if (!string.IsNullOrEmpty(RetUrl))
                 return Redirect(RetUrl);
 
+            // نمایش اطلاعات لاگین
+            HttpContext.SetCookieUserAlert("true");
+
             return RedirectToAction("index", "Dashboard", new { area = "Admin" });
         }
         #endregion
