@@ -72,6 +72,6 @@ namespace DAL.Interface
         /// <param name="userName"></param>
         /// <param name="isSuccess"></param>
         /// <param name="description"></param>
-        void Add(IHttpContextAccessor _contextAccessor, string userName, bool isSuccess = true, string description = null);
+        void Add(IHttpContextAccessor _contextAccessor, string userName, long? userId = null, bool isSuccess = true, string description = null);
     }
 }

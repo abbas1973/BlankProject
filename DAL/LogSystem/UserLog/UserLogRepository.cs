@@ -180,6 +180,10 @@ namespace DAL
             // فقط برای ورود و خروج کاربران
             filter.Start(x => x.ActionType == ActionType.Login || x.ActionType == ActionType.LogOff);
 
+            // برای کاربر جاری
+            if (filters.UserId != null)
+                filter.And(x => x.UserId == filters.UserId);
+
             var recordTotal = Entities.DeferredCount(filter).FutureValue();
 
 
@@ -187,8 +191,7 @@ namespace DAL
             if (!string.IsNullOrEmpty(searchData.searchValue))
             {
                 var srch = searchData.searchValue;
-                filter = filter.And(s => s.Description.Contains(srch) ||
-                                         s.FullName.Contains(srch));
+                filter = filter.And(s => s.Description.Contains(srch) || s.FullName.Contains(srch));
             }
             #endregion
 
@@ -323,9 +326,9 @@ namespace DAL
         /// <param name="userName"></param>
         /// <param name="isSuccess"></param>
         /// <param name="description"></param>
-        public void Add(IHttpContextAccessor _contextAccessor, string userName, bool isSuccess = true, string description = null)
+        public void Add(IHttpContextAccessor _contextAccessor, string userName, long? userId = null, bool isSuccess = true, string description = null)
         {
-            var log = new UserLog(_contextAccessor, userName, isSuccess, description);
+            var log = new UserLog(_contextAccessor, userName, userId, isSuccess, description);
             Context.Add(log);
         }
 

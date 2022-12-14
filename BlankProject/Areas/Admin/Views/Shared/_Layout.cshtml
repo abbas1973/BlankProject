@@ -85,6 +85,12 @@
                                         <span class="sidebar-normal"> تغییر کلمه عبور </span>
                                     </a>
                                 </li>
+                                <li class="nav-item @(CController == "profile" && CAction == "loginlog" ? "active" : "")">
+                                    <a class="nav-link" asp-area="Admin" asp-controller="Profile" asp-action="LoginLog">
+                                        <span class="sidebar-mini"> <span class="material-icons">compare_arrows</span> </span>
+                                        <span class="sidebar-normal"> لاگ ورود و خروج </span>
+                                    </a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-area="" asp-controller="Authentication" asp-action="Logout">
                                         <span class="sidebar-mini"><span class="material-icons">exit_to_app</span></span>

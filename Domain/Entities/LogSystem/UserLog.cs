@@ -87,7 +87,7 @@ namespace Domain.Entities
         /// <param name="_contextAccessor"></param>
         /// <param name="fullName">نام کاربری که سعی در لاگین داشت</param>
         /// <param name="isSuccess">وضعیت عملیات</param>
-        public UserLog(IHttpContextAccessor _contextAccessor, string fullName, bool isSuccess = true, string description = null, bool IsLogOut = false, bool IsApi = false) : base()
+        public UserLog(IHttpContextAccessor _contextAccessor, string fullName, long? userId = null, bool isSuccess = true, string description = null, bool IsLogOut = false, bool IsApi = false) : base()
         {
             IsSuccess = isSuccess;
             UserIp = _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
@@ -96,7 +96,8 @@ namespace Domain.Entities
             MenuType = MenuType.Login;
             MenuName = MenuType.Login.GetEnumDescription();
             FullName = fullName;
-            if(IsApi)
+            UserId = userId;
+            if (IsApi)
                 Description = "(Api) " + description;
             else
                 Description = description;

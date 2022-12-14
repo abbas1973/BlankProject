@@ -162,9 +162,9 @@ namespace Services.RedisService
         /// <param name="fullName">نام کاربری لاگین کننده</param>
         /// <param name="isSuccess">وضعیت لاگین</param>
         /// <param name="description">توضیحات</param>
-        public static async Task<bool> SetLoginLog(this IRedisDatabase db, IHttpContextAccessor _contextAccessor, string fullName, bool isSuccess = true, string description = null, bool IsLogOut = false, bool IsApi = false)
+        public static async Task<bool> SetLoginLog(this IRedisDatabase db, IHttpContextAccessor _contextAccessor, string fullName, long? userId = null, bool isSuccess = true, string description = null, bool IsLogOut = false, bool IsApi = false)
         {
-            var log = new UserLog(_contextAccessor, fullName, isSuccess, description, IsLogOut, IsApi);
+            var log = new UserLog(_contextAccessor, fullName, userId, isSuccess, description, IsLogOut, IsApi);
             var res = await db.SetLog(log);
             return res;
         }
