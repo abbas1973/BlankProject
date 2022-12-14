@@ -285,7 +285,7 @@ var user = {
             
             //TextBox left blank.
             if (password.length == 0) {
-                password_strength.removeClass('btn-warning btn-success btn-danger').css('width', '1%');
+                password_strength.removeClass('btn-warning btn-success btn-danger').css('width', '1%').html('');
                 return false;
             }
 
@@ -304,18 +304,22 @@ var user = {
                     passed++;
                 }
             }
-
+            
             switch (passed) {
                 case 0:
+                    password_strength.removeClass('btn-warning btn-success').addClass('btn-danger').css('width', '30%').html('ضعیف');
+                    break;
                 case 1:
+                    password_strength.removeClass('btn-warning btn-success').addClass('btn-danger').css('width', '30%').html('ضعیف');
+                    break;
                 case 2:
-                    password_strength.removeClass('btn-warning btn-success').addClass('btn-danger').css('width', '30%');
+                    password_strength.removeClass('btn-warning btn-success').addClass('btn-danger').css('width', '30%').html('ضعیف');
                     break;
                 case 3:
-                    password_strength.removeClass('btn-danger btn-success').addClass('btn-warning').css('width', '60%');
+                    password_strength.removeClass('btn-danger btn-success').addClass('btn-warning').css('width', '60%').html('متوسط');
                     break;
                 case 4:
-                    password_strength.removeClass('btn-danger btn-warning').addClass('btn-success').css('width', '100%');
+                    password_strength.removeClass('btn-danger btn-warning').addClass('btn-success').css('width', '100%').html('قوی');
                     break;
 
             }

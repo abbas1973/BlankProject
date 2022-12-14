@@ -41,6 +41,15 @@ namespace Domain.Enums
         ChangePasswordCycle = 4,
 
 
+
+        /// <summary>
+        /// تعداد کاراکترهایی که هنگام تغییر کلمه عبور میتواند با گلمه عبور قبلی مشترک باشد.
+        /// </summary>
+        [CustomDataType(Type = CustomDataType.Number, Min = 0, Placeholder = "کلمه عبور جدید می تواند حداکثر چند کاراکتر مشترک با کلمه عبور قبلی داشته باشد؟", DefultValue = "4")]
+        [Description("تعداد کاراکتر های تکراری مجاز در تغییر کلمه عبور")]
+        PasswordAllowedSameCharacters = 5,
+
+
     }
 
 

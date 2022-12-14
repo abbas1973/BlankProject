@@ -61,6 +61,14 @@ namespace Domain.Entities
 
 
 
+        /// <summary>
+        /// آیا دسترسی به منو مربوطه نیاز به احراز هویت مجدد دارد؟
+        /// </summary>
+        [Display(Name = "نیاز به احراز هویت مجدد دارد؟")]
+        public bool NeedReAuthorize { get; set; }
+
+
+
         #region پروپرتی های مربوط به ایجاد لینک منو
         /// <summary>
         /// نام اریایی که با کلیک بر روی منو باید اجرا شود

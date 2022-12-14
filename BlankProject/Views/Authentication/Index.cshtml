@@ -7,8 +7,13 @@
 }
 
 <!--فرم لاگین-->
-<div class="col-md-6 col-md-offset-3">
-    <form asp-action="index" asp-route-RetUrl="@(Context.Request.Query["RetUrl"])" class="form-horizontal" role="form" onsubmit="return Validate();">
+<div class="@(ViewBag.captcha != null ? "col-md-6 col-md-offset-3" : "col-md-4 col-md-offset-4")">
+    <form asp-action="index" 
+          asp-route-RetUrl="@(Context.Request.Query["RetUrl"])" 
+          asp-route-MenuId="@(Context.Request.Query["mid"])" 
+          class="form-horizontal" 
+          role="form" 
+          onsubmit="return Validate();">
         <div class="card card-login card-hidden">
             <div class="card-header text-center" data-background-color="rose">
                 <h4 class="card-title">ورود به @Config.SiteNameFa</h4>
@@ -20,6 +25,9 @@
                 @Html.Raw(ViewBag.Error)
             </p>
             <div class="card-content" style="padding:30px 15px;">
+               @* <input type="text" id="RetUrl" name="RetUrl" value="@(Context.Request.Query["RetUrl"])" />
+                <input type="text" id="MenuId" name="MenuId" value="@(Context.Request.Query["mid"])" />*@
+
                 <div class="input-group">
                     <span class="input-group-addon">
                         <i class="material-icons">account_circle</i>
@@ -38,22 +46,26 @@
                         <input type="password" id="Password" name="Password" class="form-control required">
                     </div>
                 </div>
-                <div class="form-group text-center">
-                    <div class="">
-                        @*<label class="control-label">کد امنیتی</label>*@
-                        <img alt="Captcha" id="imgcpatcha" src="@Url.Action("CaptchaImage","Captcha")" style="width: auto; height:60px;" />
-                        <br /><small>با کلیک روی عکس، کد امنیتی بازنشانی می شود</small>
+                
+                @if (ViewBag.captcha != null)
+                {
+                    <div class="form-group text-center">
+                        <div class="">
+                            @*<label class="control-label">کد امنیتی</label>*@
+                            <img alt="Captcha" id="imgcpatcha" src="@Url.Action("CaptchaImage","Captcha")" style="width: auto; height:60px;" />
+                            <br /><small>با کلیک روی عکس، کد امنیتی بازنشانی می شود</small>
+                        </div>
                     </div>
-                </div>
-                <div class="input-group text-center">
-                    <span class="input-group-addon">
-                        <i class="material-icons">security</i>
-                    </span>
-                    <div class="form-group label-floating">
-                        <label class="control-label" style="display:block;">کد امنیتی</label>
-                        <input type="number" id="captcha" name="captcha" class="form-control required">
+                    <div class="input-group text-center">
+                        <span class="input-group-addon">
+                            <i class="material-icons">security</i>
+                        </span>
+                        <div class="form-group label-floating">
+                            <label class="control-label" style="display:block;">کد امنیتی</label>
+                            <input type="number" id="captcha" name="captcha" class="form-control required">
+                        </div>
                     </div>
-                </div>
+                }
             </div>
             <div class="footer text-center">
                 <button type="submit" class="btn btn-rose btn-wd btn-lg">ورود به سایت</button>

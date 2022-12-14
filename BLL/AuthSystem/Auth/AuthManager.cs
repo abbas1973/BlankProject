@@ -72,10 +72,12 @@ namespace BLL
             #region بررسی دوره تغییر کلمه عبور توسط کاربر
             if (user.PasswordIsChanged)
             {
-                var changePassCycle = UOW.Constants.GetChangePasswordCycle();
-                if (changePassCycle != null || user.ChangePasswordCycle != null)
+                var changePassCycle = UOW.Constants.GetChangePasswordCycle() ?? 60;
+                if (user.ChangePasswordCycle != null)
                 {
-                    var cycle = Math.Min(changePassCycle ?? 0, user.ChangePasswordCycle ?? 0);
+                    var cycle = changePassCycle;
+                    if (user.ChangePasswordCycle != null && user.ChangePasswordCycle < changePassCycle)
+                        cycle = (int)user.ChangePasswordCycle;
                     var LastChangePassword = UOW.UserLogs.FirstOrDefault(x => x.IsSuccess && x.MenuType == MenuType.Profile && x.ActionType == ActionType.ChangePassword && x.TargetId == user.Id);
                     // اگر کلمه عبور را تغییر نداده بود و یا به اندازه یک سیکل از اخرین تغییر آن گذشته بود
                     if (LastChangePassword == null || LastChangePassword.CreateDate.AddDays(cycle) < DateTime.Now)

@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastracture.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20221208114401_Menu_NeedReAuthorize")]
+    partial class MenuNeedReAuthorize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,14 +89,6 @@ namespace Infrastracture.Migrations
                             Title = "اجبار تغییر کلمه عبور کاربر بعد از چند روز؟",
                             Type = 4,
                             Value = "60"
-                        },
-                        new
-                        {
-                            Id = 6L,
-                            CreateDate = new DateTime(2022, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "تعداد کاراکتر های تکراری مجاز در تغییر کلمه عبور",
-                            Type = 5,
-                            Value = "4"
                         });
                 });
 

@@ -52,6 +52,19 @@ namespace BLL.Interface
 
 
         /// <summary>
+        /// تعداد کاراکترهایی که هنگام تغییر کلمه عبور میتواند با گلمه عبور قبلی مشترک باشد.
+        /// <para>
+        /// مقدار پیشفرض 4 است.
+        /// </para>
+        /// </summary>
+        /// <returns></returns>
+        int? GetPasswordAllowedSameCharacters();
+
+
+
+
+
+        /// <summary>
         /// خواندن مقدار عددی از مقادیر ثابت
         /// </summary>
         /// <param name="Type">نوع مقادیر ثابت مورد نظر</param>
