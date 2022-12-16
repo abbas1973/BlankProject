@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Services.CookieServices;
 using Services.RedisService;
 using Services.SessionServices;
+using System.Reflection;
 using Utilities.Extentions;
 
 
@@ -42,12 +43,22 @@ namespace BlankProject.Controllers
                 if (User != null)
                     return RedirectToAction("index", "Dashboard", new { area = "Admin" });
             }
+
+            var showCaptcha = HttpContext.GetCookieShowCaptcha();
+            if (showCaptcha)
+                ViewBag.captcha = true;
+
             return View();
         }
 
 
         public IActionResult Login()
         {
+
+            var showCaptcha = HttpContext.GetCookieShowCaptcha();
+            if (showCaptcha)
+                ViewBag.captcha = true;
+
             return View("index");
         }
 
@@ -64,9 +75,6 @@ namespace BlankProject.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(string Mobile, string Password, string Captcha, string RetUrl, long? MenuId)
         {
-            // برای دفعات بعدی لاگین در صورت اشتباه وارد کردن کلمه عبور، کپچا نشان داده شود
-            ViewBag.captcha = true;
-
             #region بررسی تعداد تلاش برای لاگین و قفل بودن حساب کاربری
             //لاگ دفعات تلاش برای لاگین
             var loginLog = await Redis.db.SetLoginLog(Mobile);
@@ -81,7 +89,12 @@ namespace BlankProject.Controllers
             #endregion
 
             #region بررسی کپچا در صورت وجود
-            if (HttpContext.Request.Form.Keys.Any(x => x.Equals("captcha", StringComparison.OrdinalIgnoreCase)))
+            // برای دفعات بعدی لاگین در صورت اشتباه وارد کردن کلمه عبور، کپچا نشان داده شود
+            ViewBag.captcha = true;
+            var showCaptcha = HttpContext.GetCookieShowCaptcha();
+            HttpContext.SetCookieShowCaptcha();
+
+            if (showCaptcha)
             {
                 var captcha = HttpContext.Session.GetString("Captcha")?.Trim().ToEnglishNumber();
                 if (string.IsNullOrEmpty(captcha) || captcha != Captcha)
@@ -129,13 +142,13 @@ namespace BlankProject.Controllers
             }
             // حذف اطلاعات مربوط به کنترل تعداد دفعات تلاش برای لاگین
             await Redis.db.RemoveLoginLog(Mobile);
+
+            // حذف اطلاعات نمایش کپچا به کاربر
+            HttpContext.RemoveCookieShowCaptcha();
             #endregion
 
             if (!string.IsNullOrEmpty(RetUrl))
                 return Redirect(RetUrl);
-
-            // نمایش اطلاعات لاگین
-            HttpContext.SetCookieUserAlert("true");
 
             return RedirectToAction("index", "Dashboard", new { area = "Admin" });
         }

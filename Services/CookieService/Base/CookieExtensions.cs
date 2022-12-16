@@ -21,10 +21,10 @@ namespace Services.CookieServices
         /// <param name="key">key (unique indentifier)</param>  
         /// <param name="value">value to store in cookie object</param>  
         /// <param name="expireTimeAsDay">expiration time</param>  
-        public static void Set(this IResponseCookies ResponseCookies, string key, string value, int? expireTimeAsDay = 5, bool HttpOnly = false)
+        public static void Set(this IResponseCookies ResponseCookies, string key, string value, int? expireTimeAsDay = 5, bool HttpOnly = false, DateTime? ExpDate = null)
         {
             CookieOptions option = new CookieOptions();
-            option.Expires = DateTime.Now.AddDays(expireTimeAsDay ?? 10).Date + new TimeSpan(23, 59, 59);
+            option.Expires = ExpDate ?? DateTime.Now.AddDays(expireTimeAsDay ?? 10).Date + new TimeSpan(23, 59, 59);
             option.HttpOnly = HttpOnly;
             option.IsEssential = true;
             option.SameSite = SameSiteMode.None;
@@ -44,10 +44,10 @@ namespace Services.CookieServices
         /// <param name="ResponseCookies">ریسپانس کوکی</param>
         /// <param name="key">کلید</param>
         /// <param name="value">داده ای که درون کوکی قرار میگیرد</param>
-        public static void Set<T>(this IResponseCookies ResponseCookies, string key, T value, int? expireTimeAsDay = 5, bool HttpOnly = false)
+        public static void Set<T>(this IResponseCookies ResponseCookies, string key, T value, int? expireTimeAsDay = 5, bool HttpOnly = false, DateTime? ExpDate = null)
         {
             var st = JsonConvert.SerializeObject(value);
-            ResponseCookies.Set(key, st, expireTimeAsDay, HttpOnly);
+            ResponseCookies.Set(key, st, expireTimeAsDay, HttpOnly, ExpDate);
         }
 
 

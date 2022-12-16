@@ -122,3 +122,7 @@ $('.full-page').addClass('login-page');
 var _lcdt = localStorage.getItem(".l.c.d.T");
 if (!_lcdt) 
     loginCount.setValue(0);
+
+
+// حذف لوکال استوریج برای نمایش مدال توی داشبورد
+localStorage.removeItem('showDashboardModal');

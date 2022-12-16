@@ -3,39 +3,39 @@
 namespace Services.CookieServices
 {
     /// <summary>
-    /// ست کردن توکن کاربر در کوکی برای نمایش اطلاعات هنگام لاگین 
+    /// ست کردن کوکی برای نمایش کپچا
     /// </summary>
-    public static class CookieUserAlertManager
+    public static class CookieShowCaptchaManager
     {
-        public static readonly string Key = "UserAlert";
+        public static readonly string Key = "shwcpt";
 
         /// <summary>
-        /// گرفتن توکن کاربر
+        /// گرفتن اطلاعات نمایش کپچا
         /// </summary>
         /// <returns></returns>
-        public static string GetCookieUserAlert(this HttpContext HttpContext)
+        public static bool GetCookieShowCaptcha(this HttpContext HttpContext)
         {
             try
             {
-                return HttpContext?.Request?.Cookies?.Get(Key);
+                return HttpContext?.Request?.Cookies?.Get(Key) == "true";
             }
             catch
             {
-                return null;
+                return false;
             }
         }
 
 
         /// <summary>
-        /// افزودن توکن کاربر به کوکی
+        /// افزودن اطلاعات نمایش کپچا به کوکی
         /// </summary>
         /// <returns></returns>
-        public static bool SetCookieUserAlert(this HttpContext HttpContext, string Token)
+        public static bool SetCookieShowCaptcha(this HttpContext HttpContext)
         {
             try
             {
                 var ResponseCookies = HttpContext?.Response?.Cookies;
-                ResponseCookies?.Set(Key, Token, HttpOnly: true);                
+                ResponseCookies?.Set(Key, "true", HttpOnly: true, ExpDate: DateTime.Now.AddMinutes(60));                
                 return true;
             }
             catch
@@ -48,9 +48,9 @@ namespace Services.CookieServices
 
 
         /// <summary>
-        /// حذف توکن کاربر از کوکی
+        /// حذف اطلاعات نمایش کپچا از کوکی
         /// </summary>
-        public static bool RemoveCookieUserAlert(this HttpContext HttpContext)
+        public static bool RemoveCookieShowCaptcha(this HttpContext HttpContext)
         {
             try
             {

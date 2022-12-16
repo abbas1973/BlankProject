@@ -65,14 +65,14 @@ namespace Filters
             #endregion
 
 
-            #region اگر توکن کاربر با توکن درون ردیس یکی نباشد کاربر به صفحه لاگین منتقل می شود
+            #region لاگین شخص دیگری با این یوزرنیم - اگر توکن کاربر با توکن درون ردیس یکی نباشد کاربر به صفحه لاگین منتقل می شود
             var cookieToken = controllerObj?.HttpContext.GetCookieUserToken();
             var Redis = controllerObj?.HttpContext.RequestServices.GetService<IRedisManager>();
             var redisToken = Redis.db.GetLoginToken(User.Id).Result;
             if (string.IsNullOrEmpty(cookieToken) || cookieToken != redisToken)
             {
                 controllerObj?.HttpContext.Session.RemoveUser();
-                context.Result = new RedirectToActionResult("Index", "Authentication", new { area = "", RetUrl = url });
+                context.Result = new RedirectToActionResult("Index", "Authentication", new { area = "", RetUrl = url, newlogin = "t" });
             }
             #endregion
 

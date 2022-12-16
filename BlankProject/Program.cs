@@ -8,6 +8,9 @@ using Services.RedisService;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Utf8Json;
 using StackExchange.Redis.Extensions.Newtonsoft;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Primitives;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,7 +85,7 @@ services.AddDistributedMemoryCache();
 
 services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(180);
+    options.IdleTimeout = TimeSpan.FromMinutes(builder.Configuration.GetValue<double?>("Setting:SessionTimeout") ?? 60);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.Name = "_session.cookie";
