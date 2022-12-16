@@ -1,6 +1,8 @@
-﻿using BLL.Interface;
+﻿using BLL;
+using BLL.Interface;
 using Domain.Enums;
 using DTO.User;
+using DTO.UserLog;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
 using Services.RedisService;
@@ -22,14 +24,43 @@ namespace BlankProject.Areas.Admin.Controllers
         private readonly ISession session;
         private readonly IRedisManager Redis;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IUserLogManager logManager;
+        private readonly IDataTableManager dataTableManager;
 
-        public ProfileController(IUserManager _userManager, IHttpContextAccessor _httpContextAccessor, IRedisManager _Redis)
+        public ProfileController(IUserManager _userManager, IHttpContextAccessor _httpContextAccessor, IRedisManager _Redis,
+                                 IUserLogManager _logManager, IDataTableManager _dataTableManager)
         {
+            logManager = _logManager;
+            dataTableManager = _dataTableManager;
             userManager = _userManager;
             httpContextAccessor = _httpContextAccessor;
             Redis = _Redis;
             session = _httpContextAccessor.HttpContext.Session;
         }
+
+
+        #region نمایش ورود و خروج
+        public IActionResult LoginLog()
+        {
+            return View();
+        }
+
+
+        /// <summary>
+        /// لیست داده مورد نیاز برای دیتاتیبل
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult GetLoginLog(UserLoginLogFilter filters)
+        {
+            var user = session.GetUser();
+            filters.UserId = user.Id;
+            var SearchModel = dataTableManager.GetSearchModel();
+            var model = logManager.GetLoginDataTableDTO(SearchModel, filters);
+            return Json(model);
+        }
+
+        #endregion
 
 
         #region ویرایش

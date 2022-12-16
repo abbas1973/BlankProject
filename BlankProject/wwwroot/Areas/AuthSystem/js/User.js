@@ -14,9 +14,9 @@ var user = {
 
     // لیست کاربر ها
     list: {
+
         // آبجکت دیتاتیبل
         table: null,
-
 
         // راه اندازی دیتاتیبل
         initial: function () {
@@ -94,7 +94,6 @@ var user = {
     },
 
 
-
     // آماده سازی فرم ها
     form: {
         initial: function () {
@@ -104,7 +103,6 @@ var user = {
         },
 
     },
-
 
 
     // افزودن پرسنل جدید
@@ -170,7 +168,6 @@ var user = {
     },
 
 
-
     // ویرایش پرسنل
     edit: {
         // لود کردن فرم ویرایش پرسنل
@@ -234,8 +231,190 @@ var user = {
     },
 
 
+    // نمایش لاگ ورود و خروج
+    profileLoginLog: {
+
+        // لیست لاگ لاگین ها
+        list: {
+
+            // آبجکت دیتاتیبل
+            table: null,
+
+            // راه اندازی دیتاتیبل
+            initial: function () {
+                this.table = $('#datatables').DataTable({
+                    "drawCallback": function (settings) {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    },
+                    language: {
+                        url: "/assets/datatables/fa-lang.json"
+                    },
+                    "pagingType": "full_numbers",
+                    "lengthMenu": [
+                        [10, 25, 50],
+                        [10, 25, 50]
+                    ],
+                    responsive: true,
+                    "ajax": {
+                        "url": "/Admin/Profile/GetLoginLog",
+                        "type": "POST",
+                        "dataType": "json",
+                        "data": function (d) {
+                            return $.extend({}, d, user.profileLoginLog.filter.collect());
+                        },
+                    },
+                    "columns": [
+                        { "data": "userIp", "name": "آی پی کاربر" },
+                        { "data": "actionName", "name": "نام فعالیت" },
+                        {
+                            data: "createDate",
+                            render: function (data, type, row) {
+                                return row.createDateFa;
+                            }
+                        },
+                        {
+                            data: "isSuccess",
+                            render: function (data, type, row) {
+                                var st = '<a class="text-success">موفق</a>';
+                                if (!data) st = '<a class="text-danger">ناموفق</a>';
+                                return st;
+                            }
+                        },
+                        { "data": "description", "name": "توضیحات" },
+                    ],
+                    createdRow: (row, data, dataIndex, cells) => {
+                        if (data.isExp)
+                            $(row).addClass('bg-danger');
+                    },
+                    "serverSide": "true",
+                    "order": [2, "desc"],
+                    "processing": "true",
+                    'columnDefs': [{
+                        'targets': [4], /* column index */
+                        'orderable': false, /* true or false */
+                    }]
+
+                });
+            },
 
 
+
+            //رفرش کردن دیتا تیبل
+            reload: function (resetPage) {
+                if (resetPage != true)
+                    resetPage = false;
+
+                user.profileLoginLog.list.table.ajax.reload(function () {
+                    //$.material.init();
+                }, resetPage);
+            }
+        },
+
+
+        filter: {
+
+            initial: _ => {
+                user.profileLoginLog.filter.startDate.initial();
+                user.profileLoginLog.filter.endDate.initial();
+                $('.selectpicker').selectpicker('refresh');
+            },
+
+
+            //جمع آوری داده فیلتر
+            collect: _ => {
+                var data = {
+                    CreateStartDate: $("input[name=FilterCreateStartDate]").val(),
+                    CreateEndDate: $("input[name=FilterCreateEndDate]").val(),
+                    IsSuccess: $("#FilterIsSuccess").val(),
+                }
+
+                return data;
+            },
+
+
+            // تاریخ شروع
+            startDate: {
+
+                // آبجکت vue
+                obj: null,
+
+                //راه اندازی تقویم تاریخ شروع
+                initial: function () {
+                    if ($('#VueCreateStartDate').length == 0)
+                        return;
+                    var sdate = ''; //moment()/*.subtract(7, 'd')*/.format('jYYYY/jMM/jDD');
+                    this.obj = new Vue({
+                        el: '#VueCreateStartDate',
+                        data: {
+                            date: sdate
+                        },
+                        components: {
+                            DatePicker: VuePersianDatetimePicker
+                        },
+                        methods: {
+                            onClose: function (x) {
+                                filter.checkDates(user.profileLoginLog.filter.startDate, user.profileLoginLog.filter.endDate);
+                            }
+                        }
+                    });
+                }
+            },
+
+
+            // تاریخ پایان
+            endDate: {
+                // آبجکت vue
+                obj: null,
+
+                //راه اندازی تقویم تاریخ پایان
+                initial: function () {
+                    if ($('#VueCreateEndDate').length == 0)
+                        return;
+                    var edate = ''; // moment().format('jYYYY/jMM/jDD');
+                    this.obj = new Vue({
+                        el: '#VueCreateEndDate',
+                        data: {
+                            date: edate
+                        },
+                        components: {
+                            DatePicker: VuePersianDatetimePicker
+                        },
+                        methods: {
+                            onClose: function (x) {
+                                filter.checkDates(user.profileLoginLog.filter.startDate, user.profileLoginLog.filter.endDate);
+                            }
+                        }
+                    });
+                }
+            },
+
+
+            // بررسی تاریخ شروع و پایان
+            checkDates: function (start, end) {
+                var sdate = start.obj.date;
+                var edate = end.obj.date;
+                if (sdate && edate && sdate > edate) {
+                    showNotification("تاریخ شروع نمیتواند بعد از تاریخ پایان باشد!", 'danger');
+                    $("input[name=FilterCreateStartDate]").val('').prev('input').val('');
+                    $("input[name=FilterCreateEndDate]").val('').prev('input').val('');
+                }
+            },
+
+
+            // خالی کردن سلکتایز از ایتم انتخاب شده
+            clearSelectize: function (el) {
+                var $select = $(el).selectize();
+                var control = $select[0].selectize;
+                control.clear();
+                control.renderCache = {};
+                control.clearOptions();
+                control.refreshOptions(true);
+            },
+        },
+    },
+
+
+    // ویرایش پروفایل
     editProfile: {
         save: function () {
             if (startSubmition == true)
@@ -386,8 +565,6 @@ var user = {
     },
 
 
-
-
     // تغییر کلمه عبور پرسنل
     changePassword: {
         // لود کردن فرم تغییر کلمه عبور
@@ -457,9 +634,6 @@ var user = {
     },
 
 
-
-
-
     // ریست کردن کلمه عبور پرسنل
     resetPassword: {
         loadForm: function (id) {
@@ -519,7 +693,6 @@ var user = {
 
         }
     },
-
 
 
     // حذف پرسنل
@@ -582,7 +755,6 @@ var user = {
         }
 
     },
-
 
 
     //تغییر وضعیت فعال بودن یا نبودن کاربر در صفحه ایندکس
@@ -735,11 +907,15 @@ var filter = {
 
 
 
-
 if (controller == 'profile' && action == 'edit')
     breadcrumb.push({ title: "ویرایش پروفایل", link: "#" });
 else if (controller == 'profile' && action == 'changepassword')
     breadcrumb.push({ title: "تغییر کلمه عبور", link: "#" });
+else if (controller == 'profile' && action == 'loginlog') {
+    breadcrumb.push({ title: "لاگ ورود و خروج", link: "#" });
+    user.profileLoginLog.list.initial();
+    user.profileLoginLog.filter.initial();
+}    
 else {
     breadcrumb.push({ title: "کاربران", link: "#" });
     user.list.initial();

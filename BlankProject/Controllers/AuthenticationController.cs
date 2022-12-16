@@ -74,7 +74,7 @@ namespace BlankProject.Controllers
             if (loginLog != null && loginLog.Count > FailedLoginCount)
             {
                 var diff = (int)(loginLog.CreateDate.AddMinutes(20) - DateTime.Now).TotalMinutes;
-                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, false, $"مسدود شدن حساب کاربری تا {diff} دقیقه دیگر به دلیل {loginLog.Count} بار ورود اشتباه کلمه عبور. ");
+                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, null, false, $"مسدود شدن حساب کاربری تا {diff} دقیقه دیگر به دلیل {loginLog.Count} بار ورود اشتباه کلمه عبور. ");
                 ViewBag.Error = $"حساب کاربری شما بدلیل ورود اشتباه کلمه عبور تا {diff} دقیقه آینده مسدود می باشد.";
                 return View();
             }
@@ -86,7 +86,7 @@ namespace BlankProject.Controllers
                 var captcha = HttpContext.Session.GetString("Captcha")?.Trim().ToEnglishNumber();
                 if (string.IsNullOrEmpty(captcha) || captcha != Captcha)
                 {
-                    await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, false, "کد امنیتی صحیح نیست!");
+                    await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, null, false, "کد امنیتی صحیح نیست!");
                     ViewBag.Error = "کد امنیتی صحیح نیست!";
                     return View();
                 }
@@ -97,8 +97,8 @@ namespace BlankProject.Controllers
             var res = AuthManager.Login(Mobile, Password);
             if (!res.Status)
             {
-                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, false, res.Message);
                 var UserId = res.Model as long?;
+                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, UserId, false, res.Message);
                 if (UserId == null)
                 {
                     ViewBag.Error = res.Message;
@@ -114,7 +114,7 @@ namespace BlankProject.Controllers
             if (MenuId == null)
             {
                 // افزودن لاگ برای لاگین موفق
-                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, true, $"کاربر {User.FullName} وارد شد.");
+                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, User.Id, true, $"کاربر {User.FullName} وارد شد.");
 
                 // افزودن توکن کاربر به ردیس برای جلوگیری از لاگین همزمان 2 نفر با یک اکانت
                 var token = await Redis.db.SetLoginToken(User.Id);
@@ -134,6 +134,9 @@ namespace BlankProject.Controllers
             if (!string.IsNullOrEmpty(RetUrl))
                 return Redirect(RetUrl);
 
+            // نمایش اطلاعات لاگین
+            HttpContext.SetCookieUserAlert("true");
+
             return RedirectToAction("index", "Dashboard", new { area = "Admin" });
         }
         #endregion
@@ -143,7 +146,7 @@ namespace BlankProject.Controllers
         public ActionResult Logout()
         {
             var user = Session.GetUser();
-            _ = Redis.db.SetLoginLog(Redis.ContextAccessor, user.Username, true, $"کاربر {user.FullName} خارج شد.", true).Result;
+            _ = Redis.db.SetLoginLog(Redis.ContextAccessor, user.Username, user.Id, true, $"کاربر {user.FullName} خارج شد.", true).Result;
             Session.RemoveUser();
             HttpContext.Response.Cookies.Delete("_Session.cookie");
             return RedirectToAction("index");

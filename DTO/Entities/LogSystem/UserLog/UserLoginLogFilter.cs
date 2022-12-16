@@ -5,6 +5,9 @@ namespace DTO.UserLog
 {
     public class UserLoginLogFilter
     {
+        [Display(Name = "شناسه کاربر")]
+        public long? UserId { get; set; }
+
 
         [Display(Name = "نام کاربر")]
         public string FullName { get; set; }

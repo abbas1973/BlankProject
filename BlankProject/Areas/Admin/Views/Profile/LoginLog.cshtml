@@ -1,12 +1,9 @@
-﻿@model IEnumerable<DTO.User.UserDataTableDTO>
-@using Services.SessionServices
+﻿@model DTO.UserLog.UserLoginLogDataTableDTO
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-    var Admin = Context.Session.GetUser();
 }
-
 
 
 <!--فیلتر ها-->
@@ -23,52 +20,17 @@
             <div class="row filter-container">
                 <div class="col-md-12">
 
-                    <div class="col-md-2 form-group">
-                        <label class="label-control">نام کاربر :</label>
-                        <div>
-                            <input id="FilterName" class="form-control" />
-                        </div>
-                    </div>
-
-                    <div class="col-md-2 form-group">
-                        <label class="label-control">نام کاربری :</label>
-                        <div>
-                            <input id="FilterUsername" class="form-control" />
-                        </div>
-                    </div>
-
-                    <div class="col-md-2 form-group">
-                        <label class="label-control">تلفن همراه کاربر :</label>
-                        <div>
-                            <input id="FilterMobile" class="form-control" />
-                        </div>
-                    </div>
-
-                    <div class="col-md-2 form-group">
-                        <label class="label-control">نقش کاربر :</label>
-                        <div>
-                            <select id="FilterRoleId"
-                                    class="selectpicker"
-                                    data-size="7"
-                                    tabindex="-98"
-                                    data-style="select-with-transition"
-                                    data-live-search="true"
-                                    asp-items="ViewBag.Roles">
-                            </select>
-                        </div>
-                    </div>
-
                     <div class="form-group col-md-2">
-                        <label class="label-control">ایجاد کاربر از تاریخ :</label>
+                        <label class="label-control">ایجاد از تاریخ :</label>
                         <div style="display: block">
-                            <div id="VueStartDate" style="display:block;">
+                            <div id="VueCreateStartDate" style="display:block;">
                                 <date-picker v-model="date"
                                              type="date"
                                              editable="true"
                                              auto-submit="true"
                                              input-class="form-control"
                                              alt-format="YYYY-MM-DD HH:mm:ss"
-                                             alt-name="FilterStartDate"
+                                             alt-name="FilterCreateStartDate"
                                              @@close="onClose">
                                 </date-picker>
                             </div>
@@ -76,36 +38,33 @@
                     </div>
 
                     <div class="form-group col-md-2">
-                        <label class="label-control col-md-12">تا تاریخ :</label>
+                        <label class="label-control">ایجاد تا تاریخ :</label>
                         <div style="display: block">
-                            <div id="VueEndDate" style="display:block;">
+                            <div id="VueCreateEndDate" style="display:block;">
                                 <date-picker v-model="date"
                                              type="date"
                                              editable="true"
                                              auto-submit="true"
                                              input-class="form-control"
                                              alt-format="YYYY-MM-DD HH:mm:ss"
-                                             alt-name="FilterEndDate"
+                                             alt-name="FilterCreateEndDate"
                                              @@close="onClose">
                                 </date-picker>
                             </div>
                         </div>
                     </div>
 
-                </div>
-
-                <div class="col-md-12">
                     <div class="col-md-2 form-group">
-                        <label class="label-control">وضعیت :</label>
+                        <label class="label-control">وضعیت ورود :</label>
                         <div>
-                            <select id="FilterIsEnabled"
+                            <select id="FilterIsSuccess"
                                     class="selectpicker"
                                     data-size="7"
                                     tabindex="-98"
                                     data-style="select-with-transition">
                                 <option value="">همه</option>
-                                <option value="True">فعال</option>
-                                <option value="False">غیر فعال</option>
+                                <option value="True">موفق</option>
+                                <option value="False">ناموفق</option>
                             </select>
                         </div>
                     </div>
@@ -116,11 +75,12 @@
                             <a class="btn btn-just-icon btn-success filter-search-btn"
                                title="جستجو"
                                data-toggle="tooltip"
-                               onclick="user.list.reload()">
+                               onclick="user.profileLoginLog.list.reload(true)">
                                 <i class="material-icons">search</i>
                             </a>
                         </div>
                     </div>
+
                 </div>
 
             </div>
@@ -130,19 +90,14 @@
 
 
 
-
-
 <div class="col-md-12">
     <div class="card">
         <div class="card-header card-header-icon" data-background-color="purple">
             <i class="material-icons">assignment</i>
         </div>
         <div class="card-content">
-            <h4 class="card-title"> لیست کاربران</h4>
+            <h4 class="card-title"> لاگ ورود و خروج </h4>
             <div class="toolbar">
-                <p>
-                    <a onclick="user.create.loadForm()" class="btn btn-sm btn-success"><i class="material-icons">add_circle_outline</i> افزودن کاربر جدید</a>
-                </p>
             </div>
 
             <div class="material-datatables">
@@ -150,24 +105,20 @@
                     <thead>
                         <tr>
                             <th>
-                                شناسه
+                                @Html.DisplayNameFor(model => model.UserIp)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.FullName)
+                                @Html.DisplayNameFor(model => model.ActionName)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Username)
+                                @Html.DisplayNameFor(model => model.CreateDate)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.Mobile)
+                                @Html.DisplayNameFor(model => model.IsSuccess)
                             </th>
                             <th>
-                                @Html.DisplayNameFor(model => model.RoleId)
+                                @Html.DisplayNameFor(model => model.Description)
                             </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.IsEnabled)
-                            </th>
-                            <th class="disabled-sorting"></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -183,26 +134,9 @@
 
 
 
-
-<!-- چارچوب مدال برای فرم ها -->
-<div class="modal fade" id="base-modal" tabindex="-1" role="dialog" aria-labelledby="modal5-label" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content" id="modal-form">
-        </div>
-    </div>
-</div>
-
-
-
 @section Scripts{
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/assets/js/jquery.datatables.js"></script>
-
-    <!--For Selectize-->
-    <script src="~/assets/selectize/selectize.min.js"></script>
-
 
     <!--For DateTimePicker-->
     <script src="~/assets/VuePersianDateTimePicker/vue.min.js"></script>
@@ -210,28 +144,28 @@
     <script src="~/assets/VuePersianDateTimePicker/moment/moment-jalaali.js"></script>
     <script src="~/assets/VuePersianDateTimePicker/dist/vue-persian-datetime-picker-browser.js"></script>
 
-
-
+    <!--For Selectize-->
+    <script src="~/assets/selectize/selectize.min.js"></script>
 
     <script src="~/Areas/AuthSystem/js/User.js" asp-append-version="true"></script>
 }
 
 
 
-
-
 @section styles{
     <link href="~/assets/selectize/selectize.bootstrap3.css" rel="stylesheet" />
-
     <style>
 
-        .parameters-section .delete {
-            transform: translateY(15px);
+        .bg-danger {
+            background-color: #f2dede !important;
         }
 
-            .parameters-section .delete i {
-                font-size: 24px
-            }
+        .table-hover > tbody > tr.bg-danger:hover {
+            background-color: #ffd5d5 !important;
+        }
 
+        tr{
+            height: 50px;
+        }
     </style>
 }
