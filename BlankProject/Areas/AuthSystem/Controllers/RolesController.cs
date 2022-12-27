@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Enums;
 using DTO.Base;
+using FajrLog.Enum;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -79,13 +80,13 @@ namespace BlankProject.Areas.AuthSystem.Controllers
                 var res = await roleManager.CreateAsync(model);
                 _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Roles, res.Status,
                     res.Status ? $"نقش {model.Title} با آیدی {(long?)res.Model} : " + res.Message : res.Message,
-                    res.Status ? (long?)res.Model : null).Result;
+                    res.Status ? (long?)res.Model : null, FajrActionType.creatRole).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Roles, false, string.Join("/", errors)).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Roles, false, string.Join("/", errors),null, FajrActionType.creatRole).Result;
                 return Json(new
                 {
                     Status = false,
@@ -117,13 +118,13 @@ namespace BlankProject.Areas.AuthSystem.Controllers
             if (ModelState.IsValid)
             {
                 var res = roleManager.Update(model);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Roles, res.Status, $"نقش {model.Title} با آیدی {model.Id} : " + res.Message, model.Id).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Roles, res.Status, $"نقش {model.Title} با آیدی {model.Id} : " + res.Message, model.Id, FajrActionType.editRole).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Roles, false, $"نقش {model.Title} با آیدی {model.Id} : " + string.Join("/", errors), model.Id).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Roles, false, $"نقش {model.Title} با آیدی {model.Id} : " + string.Join("/", errors), model.Id, FajrActionType.editRole).Result;
                 return Json(new
                 {
                     Status = false,
@@ -161,11 +162,11 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         {
             if (MenuIds.Count == 0)
             {
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.AccessRoleMenu, MenuType.Roles, false, $"نقش با آیدی {RoleId} : " + "منویی انتخاب نشده است!").Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.AccessRoleMenu, MenuType.Roles, false, $"نقش با آیدی {RoleId} : " + "منویی انتخاب نشده است!", RoleId, FajrActionType.addRolePermission).Result;
                 return Json(new BaseResult(false, "منویی انتخاب نشده است!"));
             }
             var res = roleMenuManager.UpdateRoleMenus(RoleId, MenuIds);
-            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.AccessRoleMenu, MenuType.Roles, res.Status, $"نقش با آیدی {RoleId} : " + res.Message, RoleId).Result;
+            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.AccessRoleMenu, MenuType.Roles, res.Status, $"نقش با آیدی {RoleId} : " + res.Message, RoleId, FajrActionType.addRolePermission).Result;
             return Json(res);
         }
         #endregion
@@ -193,7 +194,7 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         public IActionResult Delete(long id)
         {
             var res = roleManager.DeleteWithMenus(id);
-            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Roles, res.Status, $"نقش با آیدی {id} : " + res.Message, id).Result;
+            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Roles, res.Status, $"نقش با آیدی {id} : " + res.Message, id, FajrActionType.deleteRole).Result;
             return Json(res);
         }
         #endregion

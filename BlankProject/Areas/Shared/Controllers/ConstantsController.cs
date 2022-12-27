@@ -1,5 +1,6 @@
 ﻿using BLL.Interface;
 using Domain.Enums;
+using FajrLog.Enum;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
 using Services.RedisService;
@@ -67,13 +68,13 @@ namespace BlankProject.Areas.Shared.Controllers
             if (ModelState.IsValid)
             {
                 var res = constantManager.Update(Id, Value);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Constants, res.Status, $"پارامتر تنظیمات با آیدی {Id} : " + res.Message, Id).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Constants, res.Status, $"آیدی : {Id} | عنوان : {Type.GetEnumDescription()} | توضیحات :{res.Message}", Id, FajrActionType.editSetting).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Constants, false, $"پارامتر تنظیمات با آیدی {Id} : " + string.Join("/", errors), Id).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Constants, false, $"آیدی : {Id} | عنوان : {Type.GetEnumDescription()} | توضیحات :{string.Join("/", errors)}", Id, FajrActionType.editSetting).Result;
                 return Json(new
                 {
                     Status = false,

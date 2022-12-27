@@ -64,7 +64,8 @@ namespace BLL
                 return new BaseResult
                 {
                     Status = false,
-                    Message = "حساب کاربری شما فعال نمی باشد! </br> جهت فعالسازی با پشتیبانی تماس بگیرید."
+                    Message = "حساب کاربری شما فعال نمی باشد! </br> جهت فعالسازی با پشتیبانی تماس بگیرید.",
+                    Model = user
                 };
             #endregion
 

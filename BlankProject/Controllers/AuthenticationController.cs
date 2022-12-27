@@ -1,5 +1,6 @@
 ﻿using BLL.Interface;
 using DTO.User;
+using FajrLog.Enum;
 using Microsoft.AspNetCore.Mvc;
 using Services.CookieServices;
 using Services.RedisService;
@@ -70,19 +71,23 @@ namespace BlankProject.Controllers
         /// </summary>
         /// <param name="Mobile">نام کاربری</param>
         /// <param name="Password">پسورد</param>
+        /// <param name="MenuId">اگر لاگین جهت احراز هویت مجدد برای منو خاص بود مقدار دارد</param>
         /// <param name="RetUrl"></param>
         /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Index(string Mobile, string Password, string Captcha, string RetUrl, long? MenuId)
         {
+            FajrActionType fajrActionType = MenuId == null ? FajrActionType.logIn : FajrActionType.logInSecurePage;
+
             #region بررسی تعداد تلاش برای لاگین و قفل بودن حساب کاربری
             //لاگ دفعات تلاش برای لاگین
             var loginLog = await Redis.db.SetLoginLog(Mobile);
             var FailedLoginCount = ConstantManager.GetFailedLoginCount();
             if (loginLog != null && loginLog.Count > FailedLoginCount)
             {
+                fajrActionType = FajrActionType.BlockUser;
                 var diff = (int)(loginLog.CreateDate.AddMinutes(20) - DateTime.Now).TotalMinutes;
-                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, null, false, $"مسدود شدن حساب کاربری تا {diff} دقیقه دیگر به دلیل {loginLog.Count} بار ورود اشتباه کلمه عبور. ");
+                await Redis.db.SetLoginLog(Redis.ContextAccessor, fajrActionType, Mobile, null, null, false, $"مسدود شدن حساب کاربری تا {diff} دقیقه دیگر به دلیل {loginLog.Count} بار ورود اشتباه کلمه عبور. ");
                 ViewBag.Error = $"حساب کاربری شما بدلیل ورود اشتباه کلمه عبور تا {diff} دقیقه آینده مسدود می باشد.";
                 return View();
             }
@@ -99,7 +104,7 @@ namespace BlankProject.Controllers
                 var captcha = HttpContext.Session.GetString("Captcha")?.Trim().ToEnglishNumber();
                 if (string.IsNullOrEmpty(captcha) || captcha != Captcha)
                 {
-                    await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, null, false, "کد امنیتی صحیح نیست!");
+                    await Redis.db.SetLoginLog(Redis.ContextAccessor, fajrActionType, Mobile, null, null, false, "کد امنیتی صحیح نیست!");
                     ViewBag.Error = "کد امنیتی صحیح نیست!";
                     return View();
                 }
@@ -108,27 +113,26 @@ namespace BlankProject.Controllers
 
             #region عملیات لاگین
             var res = AuthManager.Login(Mobile, Password);
+            var User = res.Model as UserSessionDTO;
             if (!res.Status)
             {
-                var UserId = res.Model as long?;
-                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, UserId, false, res.Message);
-                if (UserId == null)
+                await Redis.db.SetLoginLog(Redis.ContextAccessor, fajrActionType, Mobile, User?.FullName, User?.Id, false, res.Message);
+                if (User == null)
                 {
                     ViewBag.Error = res.Message;
                     ViewBag.InvalidLogin = true;
 
                     return View();
                 }
-            } 
+            }
             #endregion
 
             #region اطلاعات ردیس و کوکی
-            var User = res.Model as UserSessionDTO;
+            // افزودن لاگ برای لاگین موفق
+            await Redis.db.SetLoginLog(Redis.ContextAccessor, fajrActionType, Mobile, User?.FullName, User?.Id, true, $"کاربر {User.FullName} وارد شد.");
+
             if (MenuId == null)
             {
-                // افزودن لاگ برای لاگین موفق
-                await Redis.db.SetLoginLog(Redis.ContextAccessor, Mobile, User.Id, true, $"کاربر {User.FullName} وارد شد.");
-
                 // افزودن توکن کاربر به ردیس برای جلوگیری از لاگین همزمان 2 نفر با یک اکانت
                 var token = await Redis.db.SetLoginToken(User.Id);
 
@@ -159,7 +163,7 @@ namespace BlankProject.Controllers
         public ActionResult Logout()
         {
             var user = Session.GetUser();
-            _ = Redis.db.SetLoginLog(Redis.ContextAccessor, user.Username, user.Id, true, $"کاربر {user.FullName} خارج شد.", true).Result;
+            _ = Redis.db.SetLoginLog(Redis.ContextAccessor,FajrActionType.logOut, user.Username, user.FullName, user.Id, true, $"کاربر {user.FullName} خارج شد.", true).Result;
             Session.RemoveUser();
             HttpContext.Response.Cookies.Delete("_Session.cookie");
             return RedirectToAction("index");

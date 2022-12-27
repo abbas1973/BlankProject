@@ -30,6 +30,7 @@
     <ProjectReference Include="..\BLL\BLL.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\DTO\DTO.csproj" />
+    <ProjectReference Include="..\FajrLog\FajrLog.csproj" />
     <ProjectReference Include="..\Filters\Filters.csproj" />
     <ProjectReference Include="..\Infrastracture\Infrastracture.csproj" />
     <ProjectReference Include="..\Middlewars\Middlewars.csproj" />

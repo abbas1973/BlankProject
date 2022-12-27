@@ -1,5 +1,7 @@
-﻿using DTO.Menu;
+﻿using Domain.Enums;
+using DTO.Menu;
 using DTO.User;
+using FajrLog.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -7,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Services.CookieServices;
 using Services.RedisService;
 using Services.SessionServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Filters
 {
@@ -50,9 +53,11 @@ namespace Filters
 
             #region اگر ادمین درون سشن نباشد کاربر به صفحه لاگین ریدایرکت میشود
             var controllerObj = context.Controller as Controller;
+            var Redis = controllerObj?.HttpContext.RequestServices.GetService<IRedisManager>();
             var User = controllerObj?.HttpContext.Session.GetUser();
             if (User == null || User.Menus == null)
             {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Authorize, MenuType.AuthorizeFilter, false, $"تقاضای دسترسی بدون لاگین!", null, FajrActionType.AccessDeniedError).Result;
                 if (IsAjaxRequest(context))
                 {
                     context.HttpContext.Response.StatusCode = 401;
@@ -67,12 +72,21 @@ namespace Filters
 
             #region لاگین شخص دیگری با این یوزرنیم - اگر توکن کاربر با توکن درون ردیس یکی نباشد کاربر به صفحه لاگین منتقل می شود
             var cookieToken = controllerObj?.HttpContext.GetCookieUserToken();
-            var Redis = controllerObj?.HttpContext.RequestServices.GetService<IRedisManager>();
             var redisToken = Redis.db.GetLoginToken(User.Id).Result;
             if (string.IsNullOrEmpty(cookieToken) || cookieToken != redisToken)
             {
-                controllerObj?.HttpContext.Session.RemoveUser();
-                context.Result = new RedirectToActionResult("Index", "Authentication", new { area = "", RetUrl = url, newlogin = "t" });
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Authorize, MenuType.AuthorizeFilter, false, $"کاربر {User.FullName} | به دلیل ورود شخصی دیگر با این حساب کاربری، کاربر از حساب کاربری خود خارج شد!", User.Id, FajrActionType.AccessDeniedError).Result;
+                if (IsAjaxRequest(context))
+                {
+                    context.HttpContext.Response.StatusCode = 401;
+                    context.Result = new EmptyResult();
+                }
+                else
+                {
+                    controllerObj?.HttpContext.Session.RemoveUser();
+                    context.Result = new RedirectToActionResult("Index", "Authentication", new { area = "", RetUrl = url, newlogin = "t" });
+                }
+                return;
             }
             #endregion
 
@@ -83,6 +97,7 @@ namespace Filters
 
             if (!isPublic && menu == null)
             {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Authorize, MenuType.AuthorizeFilter, false, $"کاربر {User.FullName} | کاربر به صفحه درخواست شده دسترسی ندارد!", User.Id, FajrActionType.AccessDeniedError).Result;
                 if (IsAjaxRequest(context))
                 {
                     context.HttpContext.Response.StatusCode = 403;

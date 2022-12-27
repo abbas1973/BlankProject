@@ -11,6 +11,7 @@ using StackExchange.Redis.Extensions.Newtonsoft;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Primitives;
+using FajrLog.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -118,8 +119,6 @@ services.AddAntiforgery(options =>
     options.HeaderName = "_CSRF_header";
 });
 #endregion
-
-
 
 
 

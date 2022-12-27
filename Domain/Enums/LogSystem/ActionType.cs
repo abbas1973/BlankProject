@@ -89,7 +89,10 @@ namespace Domain.Enums
         DownloadExcel = 26,
 
         [Description("آپلود اکسل")]
-        UploadExcel = 27
+        UploadExcel = 27,
+
+        [Description("احراز هویت")]
+        Authorize = 28,
 
     }
 }

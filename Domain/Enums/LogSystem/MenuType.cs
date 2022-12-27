@@ -34,6 +34,9 @@ namespace Domain.Enums
         [Description("تنظیمات")]
         Constants = 8,
 
+        [Description("فیلتر احراز هویت")]
+        AuthorizeFilter = 9,
+
 
 
     }

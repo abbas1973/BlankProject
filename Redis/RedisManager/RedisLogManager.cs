@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Enums;
 using DTO.User;
+using FajrLog.Enum;
 using Microsoft.AspNetCore.Http;
 using Services.SessionServices;
 using StackExchange.Redis;
@@ -124,12 +125,17 @@ namespace Services.RedisService
         /// <param name="isSuccess"></param>
         /// <param name="description"></param>
         public static async Task<bool> SetLog(this IRedisDatabase db, IHttpContextAccessor _contextAccessor, ActionType actionType, MenuType menuType,
-            bool isSuccess = true, string description = null, long? targetId = null)
+            bool isSuccess = true, string description = null, long? targetId = null, FajrActionType? fajrActionType = null)
         {
             var user = _contextAccessor.HttpContext?.Session?.GetUser();
             var log = new UserLog(_contextAccessor, actionType, menuType, user?.FullName, user?.Id, isSuccess, description, targetId);
-            
             var res = await db.SetLog(log);
+
+            #region لاگ فجر
+            if (fajrActionType != null)
+                await db.SetFajrLog(_contextAccessor, (FajrActionType)fajrActionType, isSuccess ? FajrActionFlag.Success : FajrActionFlag.UnSuccess, FajrActionSensitivity.Info, description, targetId);
+            #endregion
+            
             return res;
         }
 
@@ -146,7 +152,7 @@ namespace Services.RedisService
         /// <param name="isSuccess"></param>
         /// <param name="description"></param>
         public static async Task<bool> SetLog(this IRedisDatabase db, IHttpContextAccessor _contextAccessor, ActionType actionType, MenuType menuType,
-            string fullName = null, long? userId = null, bool isSuccess = true, string description = null, long? targetId = null, bool IsApi = false)
+            string fullName = null, long? userId = null, bool isSuccess = true, string description = null, long? targetId = null, bool IsApi = false, FajrActionType? fajrActionType = null)
         {
             var log = new UserLog(_contextAccessor, actionType, menuType, fullName, userId, isSuccess, description, targetId, IsApi);
 
@@ -162,10 +168,15 @@ namespace Services.RedisService
         /// <param name="fullName">نام کاربری لاگین کننده</param>
         /// <param name="isSuccess">وضعیت لاگین</param>
         /// <param name="description">توضیحات</param>
-        public static async Task<bool> SetLoginLog(this IRedisDatabase db, IHttpContextAccessor _contextAccessor, string fullName, long? userId = null, bool isSuccess = true, string description = null, bool IsLogOut = false, bool IsApi = false)
+        public static async Task<bool> SetLoginLog(this IRedisDatabase db, IHttpContextAccessor _contextAccessor, FajrActionType fajrActionType, string username, string fullName = null, long? userId = null,
+            bool isSuccess = true, string description = null, bool IsLogOut = false, bool IsApi = false)
         {
-            var log = new UserLog(_contextAccessor, fullName, userId, isSuccess, description, IsLogOut, IsApi);
-            var res = await db.SetLog(log);
+            bool res = true;
+            if (fajrActionType != FajrActionType.logInSecurePage) {
+                var log = new UserLog(_contextAccessor, username, userId, isSuccess, description, IsLogOut, IsApi);
+                res = await db.SetLog(log);
+            }
+            await db.SetLoginFajrLog(_contextAccessor, fajrActionType, isSuccess ? FajrActionFlag.Success : FajrActionFlag.UnSuccess, FajrActionSensitivity.Info,username, userId, fullName, description);
             return res;
         }
         #endregion

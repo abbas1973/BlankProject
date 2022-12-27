@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AntiXssMiddleware.Middleware
 {
@@ -180,7 +181,7 @@ namespace AntiXssMiddleware.Middleware
             //context.Response.Clear();
             context.Response.Headers.AddHeaders();
             context.Response.ContentType = "application/json; charset=utf-8";
-            context.Response.StatusCode = 400;// _statusCode;
+            context.Response.StatusCode = 406; // Not Acceptable
 
             //if (_error == null)
             //{

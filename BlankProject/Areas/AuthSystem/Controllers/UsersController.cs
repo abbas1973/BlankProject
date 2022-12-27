@@ -1,12 +1,14 @@
 ﻿using BLL.Interface;
 using Domain.Enums;
 using DTO.User;
+using FajrLog.Enum;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Services.RedisService;
 using Utilities.Extentions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BlankProject.Areas.Admin.Controllers
 {
@@ -75,7 +77,7 @@ namespace BlankProject.Areas.Admin.Controllers
             {
                 if (model.RoleId == 0)
                 {
-                    _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Users, false, "نوع دسترسی کاربر را مشخص کنید!").Result;
+                    _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Users, false, "نوع دسترسی کاربر را مشخص کنید!", null , FajrActionType.creatUser).Result;
                     return Json(new { Status = false, Message = "نوع دسترسی کاربر را مشخص کنید!" });
                 }
                 if (ModelState.IsValid)
@@ -83,13 +85,13 @@ namespace BlankProject.Areas.Admin.Controllers
                     var res = UserManager.Create(model);
                     _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Users, res.Status,
                     res.Status ? $"پرسنل {model.Name} با آیدی {(long?)res.Model} : " + res.Message : res.Message,
-                    res.Status ? (long?)res.Model : null).Result;
+                    res.Status ? (long?)res.Model : null, FajrActionType.creatUser).Result;
                     return Json(res);
                 }
                 else
                 {
                     var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                    _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Users, false, string.Join("/", errors)).Result;
+                    _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Users, false, string.Join("/", errors), null, FajrActionType.creatUser).Result;
                     return Json(new
                     {
                         Status = false,
@@ -97,8 +99,9 @@ namespace BlankProject.Areas.Admin.Controllers
                     });
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Users, false, ex.ToString(), null, FajrActionType.creatUser).Result;
                 return Json(new { Status = false, Message = "ثبت اطلاعات با خطا همراه بوده است!" });
             }
         }
@@ -181,13 +184,13 @@ namespace BlankProject.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 var res = UserManager.ChangePassword(model);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ChangePassword, MenuType.Users, res.Status, $"کاربر با آیدی {model.Id} : " + res.Message).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ChangePassword, MenuType.Users, res.Status, $"کاربر با آیدی {model.Id} : " + res.Message, model.Id, FajrActionType.changeUserPassword).Result;
                 return Json(res);
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ChangePassword, MenuType.Users, false, $"کاربر با آیدی {model.Id} : " + string.Join("/", errors), model.Id).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.ChangePassword, MenuType.Users, false, $"کاربر با آیدی {model.Id} : " + string.Join("/", errors), model.Id, FajrActionType.changeUserPassword).Result;
                 return Json(new
                 {
                     Status = false,
@@ -218,7 +221,7 @@ namespace BlankProject.Areas.Admin.Controllers
             var model = UserManager.GetById(id);
             model.IsEnabled = !model.IsEnabled;
             var res = UserManager.Update(model);
-            _ = Redis.db.SetLog(Redis.ContextAccessor, (model.IsEnabled ? ActionType.Enable : ActionType.Disable), MenuType.Users, res.Status, $"کاربر {model.Name} با آیدی {id} : " + res.Message, id).Result;
+            _ = Redis.db.SetLog(Redis.ContextAccessor, (model.IsEnabled ? ActionType.Enable : ActionType.Disable), MenuType.Users, res.Status, $"کاربر {model.Name} با آیدی {id} : " + res.Message, id, model.IsEnabled ? FajrActionType.acceptUser : null).Result;
             return Json(new { res.Status, model.IsEnabled });
         }
         #endregion
@@ -229,7 +232,7 @@ namespace BlankProject.Areas.Admin.Controllers
         public IActionResult Delete(long id)
         {
             bool IsSuccess = UserManager.Delete(id);
-            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Users, IsSuccess, $"کاربر با آیدی {id} : " + (IsSuccess ? "کاربر با موفقیت حذف شد" : "حذف کاربر با خطا همراه بوده است! ابتدا مطمئن شوید که این کاربر در جای دیگری از سایت مورد استفاده قرار نگرفته است!"), id).Result;
+            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Users, IsSuccess, $"کاربر با آیدی {id} : " + (IsSuccess ? "کاربر با موفقیت حذف شد" : "حذف کاربر با خطا همراه بوده است! ابتدا مطمئن شوید که این کاربر در جای دیگری از سایت مورد استفاده قرار نگرفته است!"), id, FajrActionType.deleteUser).Result;
             return Json(new
             {
                 Status = IsSuccess,

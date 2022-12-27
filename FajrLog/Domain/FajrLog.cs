@@ -1,13 +1,15 @@
-﻿using Domain.Enums;
+﻿using Utilities.Extentions;
+using FajrLog.DTO;
+using FajrLog.Enum;
 using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.Contracts;
-using Utilities.Extentions;
+using System;
 
-
-namespace Domain.Entities
+namespace FajrLog.Domain
 {
-    public class FajrLog
+    /// <summary>
+    /// مدلی که باید برای لاگ فجر ارسال شود
+    /// </summary>
+    public class FajrLogEntity
     {
         #region چه زمانی
         /// <summary>
@@ -18,12 +20,12 @@ namespace Domain.Entities
         /// <summary>
         /// زمان رخ دادن رویداد سمت کلاینت. در پروژه وب همون timeRegister
         /// </summary>
-        public string timeOccurrence { get; set; }
+        public long timeOccurrence { get; set; }
 
         /// <summary>
         /// زمان ثبت رویداد سمت سرور سامانه
         /// </summary>
-        public string timeRegister { get; set; }
+        public long timeRegister { get; set; }
 
         /// <summary>
         /// بازه زمانی 
@@ -36,7 +38,14 @@ namespace Domain.Entities
 
 
         #region چه رویدادی
+        /// <summary>
+        /// حیطه رویداد اتفاق افتاده
+        /// </summary>
         public string actionType { get; set; }
+
+        /// <summary>
+        /// نوع رویداد اتفاق افتاده
+        /// </summary>
         public string actionSubType { get; set; }
 
         /// <summary>
@@ -68,7 +77,7 @@ namespace Domain.Entities
         /// <summary>
         /// کد هر لاگ (عددی غیر تکراری و منحصر به فرد)
         /// </summary>
-        public long? logId { get; set; }
+        public string logId { get; set; }
 
         /// <summary>
         /// شماره ردیف لاگ
@@ -364,7 +373,108 @@ namespace Domain.Entities
         /// <summary>
         /// مقدار
         /// </summary>
-        public string targetAmount { get; set; } 
+        public string targetAmount { get; set; }
         #endregion
+
+
+
+
+
+
+
+
+        #region CONSTRUCTOR
+        public FajrLogEntity()
+        {
+
+        }
+
+
+        public FajrLogEntity(IHttpContextAccessor _contextAccessor, FajrLogBaseDTO baseInfo, FajrActionType actionType, FajrActionFlag flag, FajrActionSensitivity sensitivity,
+            string username, long? userId = null, string FullName = null, string description = null, long? targetId = null)
+            : this(actionType, baseInfo)
+        {
+            userName= username;
+            uniqueId = userId;
+            firstName = FullName;
+            actionFlag = flag.ToString();
+            actionSensitivity = sensitivity.ToString();
+            actionDescription = description;
+            targetUniqueId = targetId;
+
+            var time = DateTimeOffset.Now.ToUnixTimeSeconds();
+            timeOccurrence = time;
+            timeRegister = time;
+
+            IP = _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+            var request = _contextAccessor.HttpContext.Request;
+            URL = $"{request.Scheme}//{request.Host}{request.PathBase}{request.Path}{request.QueryString}";
+        }
+
+
+        #region مقدار دهی اطلاعات بر اساس اینام نوع اکشن
+        public FajrLogEntity(FajrActionType _actionType, FajrLogBaseDTO baseInfo) : this(baseInfo)
+        {
+            var info = _actionType.GetEnumAttribute<FajrActionTypeInfoAttribute>();
+            actionId = info.ActionId;
+            actionType = info.ActionType;
+            actionSubType = info.ActionSubType;
+        }
+        #endregion
+
+
+        #region مقدار دهی اطلاعات پایه
+        /// <summary>
+        /// مقدار دهی اطلاعات پایه
+        /// </summary>
+        /// <param name="baseInfo"></param>
+        public FajrLogEntity(FajrLogBaseDTO baseInfo)
+        {
+            try
+            {
+                #region اطلاعات پایه از appseting
+                #region مشخصات نرم افزار ارسال کننده لاگ
+                appName = baseInfo.appName;
+                appVersion = baseInfo.appVersion;
+                appId = baseInfo.appId;
+                appVendor = baseInfo.appVendor;
+                appServerIP = baseInfo.appServerIP;
+                appServerHostName = baseInfo.appServerHostName;
+                appPortNum = baseInfo.appPortNum;
+                appDBIP = baseInfo.appDBIP;
+                appDBName = baseInfo.appDBName;
+                #endregion
+
+
+
+                #region مشخصات یگان
+                forceName = baseInfo.forceName;
+                forceUniqueId = baseInfo.forceUniqueId;
+                orgName = baseInfo.orgName;
+                orgUniqueId = baseInfo.orgUniqueId;
+                depName = baseInfo.depName;
+                depUniqueId = baseInfo.depUniqueId;
+                secName = baseInfo.secName;
+                secUniqueId = baseInfo.secUniqueId;
+                partName = baseInfo.partName;
+                partUniqueId = baseInfo.partUniqueId;
+                zoneName = baseInfo.zoneName;
+                zoneId = baseInfo.zoneId;
+                cityName = baseInfo.cityName;
+                cityId = baseInfo.cityId;
+                #endregion
+                #endregion
+            }
+            catch
+            {
+
+            }
+        } 
+        #endregion
+        #endregion
+
+
+
+
     }
 }

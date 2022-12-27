@@ -1,6 +1,7 @@
 ﻿using BLL.Interface;
 using Domain.Entities;
 using Domain.Enums;
+using FajrLog.Enum;
 using Filters;
 using Microsoft.AspNetCore.Mvc;
 using Services.RedisService;
@@ -69,18 +70,19 @@ namespace BlankProject.Areas.AuthSystem.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Menu model)
         {
+            FajrActionType? fajrActionType = model.NeedReAuthorize ? FajrActionType.defineSecurePage : null;
             if (ModelState.IsValid)
             {
                 var res = menuManager.Create(model);
                 _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Menus, res.Status,
                     res.Status ? $"منو {model.Title} با آیدی {(long?)res.Model} : " + res.Message : res.Message,
-                    res.Status ? (long?)res.Model : null).Result;
+                    res.Status ? (long?)res.Model : null, fajrActionType).Result;
                 return Json(new { res.Status, res.Message });
             }
             else
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Menus, false, string.Join("/", errors)).Result;
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Create, MenuType.Menus, false, string.Join("/", errors), null, fajrActionType).Result;
                 return Json(new
                 {
                     Status = false,
@@ -114,7 +116,15 @@ namespace BlankProject.Areas.AuthSystem.Controllers
             if (ModelState.IsValid)
             {
                 var res = menuManager.Update(model);
-                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Menus, res.Status, $"منو {model.Title} با آیدی {model.Id} : " + res.Message, model.Id).Result;
+                #region برای مشخص شدن عملیات لاگ فجر
+                var oldNeed = (res.Model as bool?) ?? false;
+                FajrActionType? fajrActionType = null;
+                if (!oldNeed && model.NeedReAuthorize)
+                    fajrActionType = FajrActionType.defineSecurePage;
+                else if (oldNeed && !model.NeedReAuthorize)
+                    fajrActionType = FajrActionType.removeSecurePage; 
+                #endregion
+                _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Update, MenuType.Menus, res.Status, $"منو {model.Title} با آیدی {model.Id} : " + res.Message, model.Id, fajrActionType).Result;
                 return Json(new { res.Status, res.Message });
             }
             else
@@ -148,7 +158,8 @@ namespace BlankProject.Areas.AuthSystem.Controllers
                 return Json(new { Status = false, Message = "لطفا ابتدا زیر مجموعه های این منو را حذف کنید!" });
             }
             var res = menuManager.DeleteWithRoles(id);
-            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Menus, res.Status, $"منو با آیدی {id} : " + res.Message, id).Result;
+            FajrActionType? fajrActionType = ((res.Model as bool?) ?? false ) ? FajrActionType.removeSecurePage : null;
+            _ = Redis.db.SetLog(Redis.ContextAccessor, ActionType.Remove, MenuType.Menus, res.Status, $"منو با آیدی {id} : " + res.Message, id, fajrActionType).Result;
             return Json(res);
         }
         #endregion

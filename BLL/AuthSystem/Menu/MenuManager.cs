@@ -103,20 +103,33 @@ namespace BLL
             if (!isValid.Status)
                 return isValid;
 
+            var menu = GetById(entity.Id);
+            bool NeedReAuthorize = menu.NeedReAuthorize;
+
+            menu.Title = entity.Title;
+            menu.HasLink = entity.HasLink;
+            menu.ShowInMenu= entity.ShowInMenu;
+            menu.Description = entity.Description;
+            menu.IsEnabled = entity.IsEnabled;
+            menu.NeedReAuthorize= entity.NeedReAuthorize;
+            menu.MaterialIcon = entity.MaterialIcon;
+            menu.Sort = entity.Sort;
             if (!entity.HasLink)
             {
-                entity.Area = null;
-                entity.Controller = null;
-                entity.Action = null;
-                entity.Parameters = null;
+                menu.Area = null;
+                menu.Controller = null;
+                menu.Action = null;
+                menu.Parameters = null;
             }
             else
             {
-                entity.Area = entity.Area?.ToLower();
-                entity.Controller = entity.Controller?.ToLower();
-                entity.Action = entity.Action?.ToLower();
+                menu.Area = entity.Area?.ToLower();
+                menu.Controller = entity.Controller?.ToLower();
+                menu.Action = entity.Action?.ToLower();
             }
-            return base.Update(entity);
+            var res = base.Update(menu);
+            res.Model = NeedReAuthorize;
+            return res;
         }
 
 
@@ -173,7 +186,8 @@ namespace BLL
             return new BaseResult
             {
                 Status = IsSuccess,
-                Message = IsSuccess ? "منو با موفقیت حذف شد." : "حذف منو با خطا همراه بوده است."
+                Message = IsSuccess ? "منو با موفقیت حذف شد." : "حذف منو با خطا همراه بوده است.",
+                Model = menu.NeedReAuthorize
             };
         }
 
