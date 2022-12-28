@@ -3,6 +3,8 @@ using FajrLog.DTO;
 using FajrLog.Enum;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FajrLog.Domain
 {
@@ -77,6 +79,8 @@ namespace FajrLog.Domain
         /// <summary>
         /// کد هر لاگ (عددی غیر تکراری و منحصر به فرد)
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string logId { get; set; }
 
         /// <summary>

@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Middlewars", "Middlewars\Mi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis", "Redis\Redis.csproj", "{797BDD75-692E-4F72-A4E1-8F84FB06831F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FajrLog", "FajrLog\FajrLog.csproj", "{31F77F9A-A4A2-4607-80AC-72C61CBDC1A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FajrLog", "FajrLog\FajrLog.csproj", "{31F77F9A-A4A2-4607-80AC-72C61CBDC1A7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsService.FajrLog", "WindowsService.FajrLog\WindowsService.FajrLog.csproj", "{F65D1B8C-0FF6-4A89-9BD1-E42BA78BD10B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{31F77F9A-A4A2-4607-80AC-72C61CBDC1A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31F77F9A-A4A2-4607-80AC-72C61CBDC1A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31F77F9A-A4A2-4607-80AC-72C61CBDC1A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F65D1B8C-0FF6-4A89-9BD1-E42BA78BD10B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F65D1B8C-0FF6-4A89-9BD1-E42BA78BD10B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F65D1B8C-0FF6-4A89-9BD1-E42BA78BD10B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F65D1B8C-0FF6-4A89-9BD1-E42BA78BD10B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

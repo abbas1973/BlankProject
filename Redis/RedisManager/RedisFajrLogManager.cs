@@ -137,24 +137,24 @@ namespace Services.RedisService
         }
 
 
-        ///// <summary>
-        ///// افزودن لاگ ها به ردیس
-        ///// </summary>
-        ///// <param name="db">دیتابیس ردیس</param>
-        ///// <param name="log">ایتم لاگ</param>
-        ///// <returns></returns>
-        //public static async Task<bool> SetFajrLogs(this IRedisDatabase db, List<FajrLogEntity> logs)
-        //{
-        //    try
-        //    {
-        //        var x = await db.SetAddAllAsync<FajrLogEntity>(Key, CommandFlags.None, logs.ToArray());
-        //        return x > 0;
-        //    }
-        //    catch
-        //    {
-        //        return false;
-        //    }
-        //}
+        /// <summary>
+        /// افزودن لاگ ها به ردیس
+        /// </summary>
+        /// <param name="db">دیتابیس ردیس</param>
+        /// <param name="log">ایتم لاگ</param>
+        /// <returns></returns>
+        public static async Task<bool> SetFajrLogs(this IRedisDatabase db, List<FajrLogEntity> logs)
+        {
+            try
+            {
+                var x = await db.SetAddAllAsync<FajrLogEntity>(Key, CommandFlags.None, logs.ToArray());
+                return x > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
 
 
