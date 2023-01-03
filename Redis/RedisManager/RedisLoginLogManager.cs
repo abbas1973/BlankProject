@@ -52,12 +52,21 @@ namespace Services.RedisService
             try
             {
                 var log = await db.GetLoginLog(Username);
+                
                 if (log != null)
                 {
-                    await db.RemoveLoginLog(Username);
-                    log.Count += 1;
-                    if(log.Count <= 5)
-                        log.CreateDate = DateTime.Now;
+                    if (log.CreateDate.AddMinutes(expMin ?? ExpMin) <= DateTime.Now)
+                    {
+                        await db.RemoveLoginLog(Username);
+                        log = null;
+                    }
+                    else
+                    {
+                        await db.RemoveLoginLog(Username);
+                        log.Count += 1;
+                        if (log.Count <= 5)
+                            log.CreateDate = DateTime.Now;
+                    }
                 }
                 else
                     log = new LoginLogDTO(1);

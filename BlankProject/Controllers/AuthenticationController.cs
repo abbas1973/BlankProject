@@ -85,6 +85,7 @@ namespace BlankProject.Controllers
             var FailedLoginCount = ConstantManager.GetFailedLoginCount();
             if (loginLog != null && loginLog.Count > FailedLoginCount)
             {
+                ViewBag.captcha = true;
                 fajrActionType = FajrActionType.BlockUser;
                 var diff = (int)(loginLog.CreateDate.AddMinutes(20) - DateTime.Now).TotalMinutes;
                 await Redis.db.SetLoginLog(Redis.ContextAccessor, fajrActionType, Mobile, null, null, false, $"مسدود شدن حساب کاربری تا {diff} دقیقه دیگر به دلیل {loginLog.Count} بار ورود اشتباه کلمه عبور. ");
