@@ -160,7 +160,8 @@ namespace DTO.Menu
                     NeedReAuthorize = model.Menu.NeedReAuthorize,
                     Controller = model.Menu.Controller,
                     Action = model.Menu.Action,
-                    Parameters = model.Menu.Parameters
+                    Parameters = model.Menu.Parameters,
+
                 };
             }
         }
