@@ -68,7 +68,8 @@ namespace Services.RedisService
                             log.CreateDate = DateTime.Now;
                     }
                 }
-                else
+
+                if(log == null)
                     log = new LoginLogDTO(1);
 
                 var isSuccess = await db.AddAsync(Key + Username, log, DateTimeOffset.Now.AddMinutes(expMin ?? ExpMin));
