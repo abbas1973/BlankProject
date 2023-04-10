@@ -73,11 +73,11 @@ services.AddHttpContextAccessor();
 
 
 #region اضافه کردن سرویس کوکی
-//services.Configure<CookiePolicyOptions>(options =>
-//{
-//    options.CheckConsentNeeded = context => true;
-//    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
-//});
+services.Configure<CookiePolicyOptions>(options =>
+{
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+});
 #endregion
 
 
@@ -165,7 +165,7 @@ var app = builder.Build();
 
 app.UseHsts();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
